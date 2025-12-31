@@ -1,0 +1,560 @@
+{% extends "budsidesk_app/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Disclosure Agreement (NDA) Editor</title>
+    <style>
+        .document-editor {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(75, 73, 172, 0.1);
+            border: 1px solid #f0f2ff;
+        }
+        
+        .editor-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #98BDFF;
+        }
+        
+        .editor-header h1 {
+            color: #4B49AC;
+            margin: 0;
+            font-size: 1.75rem;
+        }
+        
+        .editor-header p {
+            color: #7DA0FA;
+            margin: 10px 0 0;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #f0f2ff;
+            box-shadow: 0 2px 6px rgba(75, 73, 172, 0.05);
+        }
+        
+        .section-card:hover {
+            border-color: #98BDFF;
+            box-shadow: 0 4px 10px rgba(75, 73, 172, 0.1);
+        }
+        
+        .section-title {
+            color: #4B49AC;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #98BDFF;
+            padding-bottom: 8px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .form-group-full {
+            width: 100%;
+        }
+        
+        .field-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #4B49AC;
+            font-size: 0.9rem;
+        }
+        
+        .required-field::after {
+            content: " *";
+            color: #FF6B6B;
+        }
+        
+        .help-text {
+            font-size: 0.8rem;
+            color: #7DA0FA;
+            margin-top: 4px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #98BDFF;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            background: #f8f9ff;
+            color: #4B49AC;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4B49AC;
+            box-shadow: 0 0 0 2px rgba(75, 73, 172, 0.2);
+            background: white;
+        }
+        
+        textarea.form-control {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .date-field, .number-field {
+            width: auto;
+            min-width: 150px;
+        }
+        
+        .signature-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .signature-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px;
+            border: 1px solid #98BDFF;
+            border-radius: 8px;
+            background: #f8f9ff;
+        }
+        
+        .signature-line {
+            border-bottom: 1px solid #4B49AC;
+            margin: 20px 0 10px;
+            min-height: 25px;
+        }
+        
+        .form-actions {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9ff, #f0f2ff);
+            border-radius: 8px;
+            border: 1px solid #f0f2ff;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #4B49AC;
+            color: white;
+            border: 2px solid #4B49AC;
+        }
+        
+        .btn-primary:hover {
+            background: #7978E9;
+            border-color: #7978E9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(75, 73, 172, 0.3);
+        }
+        
+        .checkbox-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .checkbox-list li {
+            margin-bottom: 8px;
+            padding-left: 24px;
+            position: relative;
+        }
+        
+        .checkbox-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4B49AC;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .signature-section {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="document-editor">
+        <div class="editor-header">
+            <h1>Non-Disclosure Agreement (NDA) Editor</h1>
+            <p>Create and customize your confidentiality agreement</p>
+        </div>
+        
+        <form id="documentForm">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            
+            <!-- Agreement Date -->
+            <div class="section-card">
+                <h3 class="section-title">Agreement Details</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="field-label required-field">Agreement Date</label>
+                        <input type="date" name="agreement_date" value="{{ today }}" class="form-control date-field">
+                        <div class="help-text">Date when the agreement is signed</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parties Information -->
+            <div class="section-card">
+                <h3 class="section-title">Parties to the Agreement</h3>
+                
+                <div class="form-row">
+                    <!-- Disclosing Party -->
+                    <div class="form-group">
+                        <h4>Disclosing Party</h4>
+                        <label class="field-label required-field">Company/Client Name</label>
+                        <input type="text" name="client_name" value="{{ client.name }}" class="form-control" placeholder="Full company name">
+                        
+                        <label class="field-label">Address</label>
+                        <textarea name="client_address" class="form-control" placeholder="Complete address">{{ client.address }}</textarea>
+                        
+                        <label class="field-label">Contact Person</label>
+                        <input type="text" name="client_contact_person" value="{{ client.contact_person }}" class="form-control" placeholder="Contact name">
+                    </div>
+                    
+                    <!-- Receiving Party -->
+                    <div class="form-group">
+                        <h4>Receiving Party</h4>
+                        <label class="field-label required-field">Your Name/Company</label>
+                        <input type="text" name="provider_name" value="{{ provider.name }}" class="form-control" placeholder="Your name or company name">
+                        
+                        <label class="field-label">Address</label>
+                        <textarea name="provider_address" class="form-control" placeholder="Your complete address">{{ provider.address }}</textarea>
+                        
+                        <label class="field-label">Contact Person</label>
+                        <input type="text" name="provider_contact_person" value="{{ provider.contact_person }}" class="form-control" placeholder="Your name or contact person">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agreement Purpose -->
+            <div class="section-card">
+                <h3 class="section-title">1. Purpose</h3>
+                <div class="form-group-full">
+                    <label class="field-label required-field">Agreement Purpose</label>
+                    <textarea name="project_purpose" class="form-control" placeholder="Describe the purpose of this confidentiality agreement">{{ project.purpose }}</textarea>
+                    <div class="help-text">Example: "Evaluation of a potential business relationship for the development of..."</div>
+                </div>
+            </div>
+
+            <!-- Project Information -->
+            <div class="section-card">
+                <h3 class="section-title">Project Information</h3>
+                
+                <div class="form-group-full">
+                    <label class="field-label required-field">Project Name</label>
+                    <input type="text" name="project_name" value="{{ project.name }}" class="form-control" placeholder="Project or service name">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="field-label">Project Duration (months)</label>
+                        <input type="number" name="project_duration" value="{{ project.duration_months }}" class="form-control number-field" min="1" max="60" placeholder="6">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="field-label">Confidentiality Period (years)</label>
+                        <input type="number" name="confidentiality_period" value="{{ terms.confidentiality_period }}" class="form-control number-field" min="1" max="10" placeholder="2">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confidential Information Definition -->
+            <div class="section-card">
+                <h3 class="section-title">2. Definition of Confidential Information</h3>
+                <p>
+                    "Confidential Information" means any non-public information disclosed by the Disclosing Party, 
+                    including but not limited to:
+                </p>
+                <ul class="checkbox-list">
+                    <li>Business plans and commercial strategies</li>
+                    <li>Data, trade secrets and know-how</li>
+                    <li>Technical materials and software</li>
+                    <li>Customer and supplier information</li>
+                    <li>Any information marked as confidential</li>
+                </ul>
+            </div>
+
+            <!-- Receiving Party Obligations -->
+            <div class="section-card">
+                <h3 class="section-title">3. Receiving Party Obligations</h3>
+                <p>
+                    The Receiving Party agrees to:
+                </p>
+                <ul class="checkbox-list">
+                    <li>Maintain all Confidential Information in strict confidence</li>
+                    <li>Not disclose it to third parties without written consent</li>
+                    <li>Use the Confidential Information only for the agreed purposes</li>
+                    <li>Implement reasonable security measures to protect the information</li>
+                </ul>
+            </div>
+
+            <!-- Exceptions -->
+            <div class="section-card">
+                <h3 class="section-title">4. Exceptions</h3>
+                <p>
+                    The above obligations do not apply to information that:
+                </p>
+                <ul class="checkbox-list">
+                    <li>Was already known without violation of any NDA</li>
+                    <li>Becomes public without fault of the Receiving Party</li>
+                    <li>Is disclosed with written consent</li>
+                    <li>Must be disclosed by law (with prior notification)</li>
+                </ul>
+            </div>
+
+            <!-- Legal Terms -->
+            <div class="section-card">
+                <h3 class="section-title">Legal Terms</h3>
+                
+                <div class="form-group">
+                    <label class="field-label required-field">Jurisdiction</label>
+                    <select name="jurisdiction" class="form-control">
+                        <option value="Ireland" {% if terms.jurisdiction == 'Ireland' %}selected{% endif %}>Ireland</option>
+                        <option value="Spain" {% if terms.jurisdiction == 'Spain' %}selected{% endif %}>Spain</option>
+                        <option value="USA" {% if terms.jurisdiction == 'USA' %}selected{% endif %}>United States</option>
+                        <option value="UK" {% if terms.jurisdiction == 'UK' %}selected{% endif %}>United Kingdom</option>
+                        <option value="other">Other</option>
+                    </select>
+                    
+                    <div id="other-jurisdiction" style="margin-top: 10px; display: none;">
+                        <label class="field-label">Specify Jurisdiction</label>
+                        <input type="text" name="other_jurisdiction" class="form-control" placeholder="Specify jurisdiction">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Return or Destruction -->
+            <div class="section-card">
+                <h3 class="section-title">5. Return or Destruction</h3>
+                <p>
+                    Upon request of the Disclosing Party, the Receiving Party shall return or destroy all Confidential Information.
+                </p>
+            </div>
+
+            <!-- No License -->
+            <div class="section-card">
+                <h3 class="section-title">6. No License</h3>
+                <p>
+                    Nothing in this Agreement grants rights over the Confidential Information except as expressly stated.
+                </p>
+            </div>
+
+            <!-- Signatures -->
+            <div class="section-card">
+                <h3 class="section-title">Signatures</h3>
+                
+                <div class="signature-section">
+                    <!-- Disclosing Party Signature -->
+                    <div class="signature-box">
+                        <h4>Disclosing Party</h4>
+                        <div class="signature-line"></div>
+                        <label class="field-label">Name:</label>
+                        <input type="text" name="disclosing_party_name" value="{{ client.name }}" class="form-control">
+                        
+                        <label class="field-label">Signature:</label>
+                        <div class="signature-line"></div>
+                        
+                        <label class="field-label">Date:</label>
+                        <input type="date" name="disclosing_party_date" value="{{ today }}" class="form-control date-field">
+                    </div>
+                    
+                    <!-- Receiving Party Signature -->
+                    <div class="signature-box">
+                        <h4>Receiving Party</h4>
+                        <div class="signature-line"></div>
+                        <label class="field-label">Name:</label>
+                        <input type="text" name="receiving_party_name" value="{{ provider.name }}" class="form-control">
+                        
+                        <label class="field-label">Signature:</label>
+                        <div class="signature-line"></div>
+                        
+                        <label class="field-label">Date:</label>
+                        <input type="date" name="receiving_party_date" value="{{ today }}" class="form-control date-field">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" onclick="submitDocument()">
+                    <i class="fas fa-paper-plane"></i> Send by Email
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Mostrar/ocultar campo de jurisdicción personalizada
+        document.querySelector('select[name="jurisdiction"]').addEventListener('change', function() {
+            const otherDiv = document.getElementById('other-jurisdiction');
+            otherDiv.style.display = this.value === 'other' ? 'block' : 'none';
+        });
+
+        // Inicializar visibilidad del campo de jurisdicción
+        document.addEventListener('DOMContentLoaded', function() {
+            const jurisdictionSelect = document.querySelector('select[name="jurisdiction"]');
+            const otherDiv = document.getElementById('other-jurisdiction');
+            otherDiv.style.display = jurisdictionSelect.value === 'other' ? 'block' : 'none';
+        });
+
+        function collectFormData() {
+            const form = document.getElementById('documentForm');
+            const formData = new FormData(form);
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            // Procesar jurisdicción
+            if (data.jurisdiction === 'other') {
+                data.jurisdiction = data.other_jurisdiction;
+            }
+            delete data.other_jurisdiction;
+            
+            return data;
+        }
+        
+        function submitDocument() {
+            if (!confirm('Are you sure you want to send this NDA by email?')) {
+                return;
+            }
+            
+            const data = collectFormData();
+            
+            // Validación básica
+            if (!data.client_name || !data.provider_name || !data.project_purpose) {
+                alert('Please complete the required fields marked with *');
+                return;
+            }
+            
+            // Mostrar loading
+            const submitBtn = document.querySelector('.btn-primary');
+            const originalText = submitBtn.textContent;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            submitBtn.disabled = true;
+            
+            // Enviar al servidor para generar PDF y enviar por correo
+            fetch('/legal/templates/submit-document/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({
+                    doc_type: 'non_disclosure',
+                    form_data: data
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('NDA sent by email successfully');
+                    // Limpiar borrador
+                    localStorage.removeItem('nda_draft');
+                    // Opcional: redirigir o limpiar formulario
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            })
+            .catch(error => {
+                alert('Connection error: ' + error);
+            })
+            .finally(() => {
+                // Restaurar botón
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send by Email';
+                submitBtn.disabled = false;
+            });
+        }
+        
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+        
+        // Cargar borrador guardado si existe
+        document.addEventListener('DOMContentLoaded', function() {
+            // Intentar cargar desde localStorage
+            const draft = localStorage.getItem('nda_draft');
+            if (draft) {
+                const data = JSON.parse(draft);
+                for (const [key, value] of Object.entries(data)) {
+                    const field = document.querySelector(`[name="${key}"]`);
+                    if (field) {
+                        if (field.type === 'checkbox') {
+                            field.checked = value;
+                        } else {
+                            field.value = value;
+                        }
+                    }
+                }
+                
+                // Actualizar jurisdicción si es necesario
+                const jurisdictionSelect = document.querySelector('select[name="jurisdiction"]');
+                if (!['Ireland', 'Spain', 'USA', 'UK'].includes(data.jurisdiction)) {
+                    jurisdictionSelect.value = 'other';
+                    document.getElementById('other-jurisdiction').style.display = 'block';
+                    document.querySelector('input[name="other_jurisdiction"]').value = data.jurisdiction;
+                }
+                
+                console.log('Draft loaded from localStorage');
+            }
+            
+            // También podrías cargar desde el servidor aquí
+        });
+
+        // Auto-guardar cada 30 segundos
+        setInterval(function() {
+            const data = collectFormData();
+            localStorage.setItem('nda_draft', JSON.stringify(data));
+        }, 30000);
+    </script>
+</body>
+</html>
+
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends 'budsidesk_app/base.html' %}
+{% load static %}
+
+
+{% block extra_css %}
+<style>
+.policy-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+    
+    color: #333;
+}
+
+.policy-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #98BDFF;
+    padding-bottom: 1rem;
+}
+
+.policy-header h1 {
+    color: #4B49AC;
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+}
+
+.last-updated {
+    color: #7f8c8d;
+    font-style: italic;
+    font-size: 1rem;
+}
+
+.policy-nav {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #98BDFF 0%, #7DA0FA 100%);
+    border-radius: 8px;
+    border: 1px solid #4B49AC;
+}
+
+.policy-nav a {
+    color: #4B49AC;
+    text-decoration: none;
+    margin: 0 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.policy-nav a:hover {
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.3);
+    color: #2c3e50;
+}
+
+.policy-content section {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(75, 73, 172, 0.1);
+    border-left: 4px solid #7978E9;
+}
+
+.policy-content h2 {
+    color: #4B49AC;
+    border-bottom: 1px solid #ecf0f1;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.policy-content ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.policy-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.policy-content strong {
+    color: #4B49AC;
+}
+
+.policy-content a {
+    color: #4B49AC;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.policy-content a:hover {
+    text-decoration: underline;
+    color: #7978E9;
+}
+
+.policy-content p {
+    margin-bottom: 1rem;
+}
+
+.highlight-box {
+    background-color: rgba(152, 189, 255, 0.1);
+    border: 1px solid #98BDFF;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.contact-highlight {
+    background-color: rgba(121, 120, 233, 0.1);
+    border-left: 4px solid #7978E9;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+@media (max-width: 768px) {
+    .policy-container {
+        padding: 1rem;
+    }
+    
+    .policy-header h1 {
+        font-size: 2rem;
+    }
+    
+    .policy-nav {
+        font-size: 0.9rem;
+    }
+    
+    .policy-nav a {
+        display: inline-block;
+        margin: 0.25rem;
+    }
+    
+    .policy-content section {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="policy-container">
+    <div class="policy-header">
+        <h1>Refund Policy</h1>
+        <p class="last-updated">Effective date: November 2025</p>
+    </div>
+
+    <nav class="policy-nav">
+        <a href="{% url 'privacy' %}">Privacy Policy</a> |
+        <a href="{% url 'terms' %}">Terms of Service</a> |
+        <a href="{% url 'cookies' %}">Cookie Policy</a> |
+        <a href="{% url 'refunds' %}">Refund Policy</a> |
+        <a href="{% url 'disclaimer' %}">Disclaimer</a> |
+        <a href="{% url 'legal' %}">Legal Notice</a> |
+        <a href="{% url 'accessibility' %}">Accessibility</a>
+    </nav>
+
+    <div class="policy-content">
+        <section>
+            <h2>Overview</h2>
+            <p>BudsiDesk operates on a subscription basis. We aim for complete satisfaction, but if you are not happy with your subscription, please review our refund conditions below.</p>
+        </section>
+
+        <section>
+            <h2>Free Trial</h2>
+            <p>We may offer a free trial period so you can evaluate BudsiDesk before subscribing. After the trial ends, you'll be billed automatically unless you cancel before renewal.</p>
+        </section>
+
+        <section>
+            <h2>Subscription Refunds</h2>
+            <ul>
+                <li><strong>Monthly plans:</strong> Refunds are not provided for partial months or unused time.</li>
+                <li><strong>Annual plans:</strong> Refunds may be granted within <strong>14 days</strong> of purchase if the account has not been actively used.</li>
+                <li><strong>Renewals:</strong> Refunds are not issued for renewal payments after the renewal date has passed.</li>
+            </ul>
+            <p>To request a refund, contact <a href="mailto:admin@budsidesk.com">admin@budsidesk.com</a> with your account details.</p>
+        </section>
+
+        <section>
+            <h2>Cancellations</h2>
+            <p>You can cancel your subscription anytime from your account settings. Once cancelled, your plan will remain active until the end of your current billing cycle.</p>
+        </section>
+
+        <section>
+            <h2>Exceptional Circumstances</h2>
+            <p>We may approve refunds in rare cases of:</p>
+            <ul>
+                <li>Duplicate payments</li>
+                <li>Technical issues preventing access</li>
+                <li>Legal obligations requiring refund</li>
+            </ul>
+            <p>All decisions are made at our discretion.</p>
+        </section>
+
+        <section>
+            <h2>Changes to Policy</h2>
+            <p>We may update this policy periodically. Please check this page for the latest version.</p>
+        </section>
+    </div>
+</div>
+{% endblock %}

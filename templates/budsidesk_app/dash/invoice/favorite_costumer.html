@@ -1,0 +1,26 @@
+{# budsidesk_app/invoices/create.html #}
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  {% if prefilled_contact %}
+    <div class="form-row">
+      <label>Client</label>
+      <input type="text" value="{{ prefilled_contact.name }}" readonly>
+      <input type="hidden" name="contact" value="{{ prefilled_contact.id }}">
+    </div>
+  {% else %}
+    {{ form.contact }} {# selector normal #}
+  {% endif %}
+
+  {# Resto de campos del form, que ya vienen con initial #}
+  {{ form.client_email }}
+  {{ form.client_address }}
+  {{ form.client_vat_number }}
+  {{ form.date }}
+  {{ form.description }}
+  {{ form.subtotal }}
+  {{ form.vat_amount }}
+  {{ form.total }}
+
+  <button type="submit" class="btn btn-primary">Create Invoice</button>
+</form>

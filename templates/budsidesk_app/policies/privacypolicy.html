@@ -1,0 +1,247 @@
+{% extends 'budsidesk_app/base.html' %}
+{% load static %}
+
+
+{% block extra_css %}
+<style>
+.policy-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+    
+    color: #333;
+}
+
+.policy-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #98BDFF;
+    padding-bottom: 1rem;
+}
+
+.policy-header h1 {
+    color: #4B49AC;
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+}
+
+.last-updated {
+    color: #7f8c8d;
+    font-style: italic;
+    font-size: 1rem;
+}
+
+.policy-nav {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #98BDFF 0%, #7DA0FA 100%);
+    border-radius: 8px;
+    border: 1px solid #4B49AC;
+}
+
+.policy-nav a {
+    color: #4B49AC;
+    text-decoration: none;
+    margin: 0 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.policy-nav a:hover {
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.3);
+    color: #2c3e50;
+}
+
+.policy-content section {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(75, 73, 172, 0.1);
+    border-left: 4px solid #7978E9;
+}
+
+.policy-content h2 {
+    color: #4B49AC;
+    border-bottom: 1px solid #ecf0f1;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.policy-content ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.policy-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.policy-content strong {
+    color: #4B49AC;
+}
+
+.policy-content a {
+    color: #4B49AC;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.policy-content a:hover {
+    text-decoration: underline;
+    color: #7978E9;
+}
+
+.policy-content p {
+    margin-bottom: 1rem;
+}
+
+.highlight-box {
+    background-color: rgba(152, 189, 255, 0.1);
+    border: 1px solid #98BDFF;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.contact-highlight {
+    background-color: rgba(121, 120, 233, 0.1);
+    border-left: 4px solid #7978E9;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+@media (max-width: 768px) {
+    .policy-container {
+        padding: 1rem;
+    }
+    
+    .policy-header h1 {
+        font-size: 2rem;
+    }
+    
+    .policy-nav {
+        font-size: 0.9rem;
+    }
+    
+    .policy-nav a {
+        display: inline-block;
+        margin: 0.25rem;
+    }
+    
+    .policy-content section {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="policy-container">
+    <div class="policy-header">
+        <h1>Privacy Policy</h1>
+        <p class="last-updated">Last updated: November 2025</p>
+    </div>
+
+    <nav class="policy-nav">
+        <a href="{% url 'privacy' %}">Privacy Policy</a> |
+        <a href="{% url 'terms' %}">Terms of Service</a> |
+        <a href="{% url 'cookies' %}">Cookie Policy</a> |
+        <a href="{% url 'refunds' %}">Refund Policy</a> |
+        <a href="{% url 'disclaimer' %}">Disclaimer</a> |
+        <a href="{% url 'legal' %}">Legal Notice</a> |
+        <a href="{% url 'accessibility' %}">Accessibility</a>
+    </nav>
+
+    <div class="policy-content">
+        <section>
+            <h2>Who We Are</h2>
+            <p>BudsiDesk ("we", "our", "us") is a cloud-based accounting and business management platform that helps users manage invoices, expenses, taxes, projects, and documents in one organized space. Our website and app are operated by:</p>
+            <p><strong>BudsiDesk Ltd.</strong><br>
+            77 Camden Street Lower, Saint Kevin's, Dublin 2, Co. Dublin, Ireland, D02 XE80<br>
+            <a href="mailto:admin@budsidesk.com">admin@budsidesk.com</a><br>
+            Register Number: IE 801180</p>
+        </section>
+
+        <section>
+            <h2>Information We Collect</h2>
+            <p>We collect information to provide and improve our services, including:</p>
+            <ul>
+                <li><strong>Account information:</strong> name, email address, business details, and password.</li>
+                <li><strong>Billing and payment data:</strong> subscription details, billing address, and payment method (processed securely by third-party providers; we never store full card details).</li>
+                <li><strong>Usage data:</strong> IP address, device information, browser type, and activity logs.</li>
+                <li><strong>Business data:</strong> invoices, expenses, tax records, projects, and uploaded documents you manage within BudsiDesk.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>How We Use Your Data</h2>
+            <p>We use your information to:</p>
+            <ul>
+                <li>Provide, personalize, and improve BudsiDesk services.</li>
+                <li>Process payments and manage subscriptions.</li>
+                <li>Send service-related messages (e.g., invoices, updates, or security alerts).</li>
+                <li>Offer support and respond to your inquiries.</li>
+                <li>Comply with legal obligations (tax, accounting, anti-fraud).</li>
+            </ul>
+            <p>We <strong>do not sell</strong> or rent your personal data.</p>
+        </section>
+
+        <section>
+            <h2>Legal Bases for Processing (GDPR)</h2>
+            <p>We process your data only when:</p>
+            <ul>
+                <li>It's necessary to perform our contract with you.</li>
+                <li>You've given consent (e.g., marketing emails).</li>
+                <li>We have a legitimate business interest (e.g., improving user experience).</li>
+                <li>We're required by law.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Data Sharing</h2>
+            <p>We may share limited data with:</p>
+            <ul>
+                <li><strong>Service providers</strong> (hosting, analytics, payment processors) under strict confidentiality agreements.</li>
+                <li><strong>Authorities or regulators</strong>, when legally required.</li>
+            </ul>
+            <p>Your data remains under your control; you may export or delete it at any time.</p>
+        </section>
+
+        <section>
+            <h2>Data Retention</h2>
+            <p>We keep your data only as long as necessary to deliver the service or comply with legal obligations. When you close your account, we delete or anonymize your data within a reasonable period.</p>
+        </section>
+
+        <section>
+            <h2>Your Rights</h2>
+            <p>Depending on your location, you may have the right to:</p>
+            <ul>
+                <li>Access, correct, or delete your data.</li>
+                <li>Withdraw consent for processing.</li>
+                <li>Request a copy of your data.</li>
+                <li>Object to certain uses (e.g., marketing).</li>
+            </ul>
+            <p>You can contact us at <a href="mailto:admin@budsidesk.com">admin@budsidesk.com</a> to exercise these rights.</p>
+        </section>
+
+        <section>
+            <h2>Security</h2>
+            <p>We use encryption, secure servers, and strict access controls to protect your data. However, no system is completely secure, and you use BudsiDesk at your own risk.</p>
+        </section>
+
+        <section>
+            <h2>Updates</h2>
+            <p>We may update this policy periodically. Changes will be posted here with a new "Last updated" date.</p>
+        </section>
+    </div>
+</div>
+{% endblock %}

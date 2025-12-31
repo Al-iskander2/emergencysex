@@ -1,0 +1,267 @@
+{% extends 'budsidesk_app/base.html' %}
+{% load static %}
+{% load math_filters %}
+{% block content %}
+
+<div style="max-width: 1100px; margin: 32px auto; padding: 0 20px;">
+  <!-- Header without actions (moved to bottom) -->
+  <div style="margin-bottom: 24px;">
+    <h1 style="margin: 0; color: #4B49AC; font-size: 1.8rem;">Invoice #{{ invoice.invoice_number }}</h1>
+    <p style="margin: 4px 0 0; color: #6b7a90;">Created on {{ invoice.date|date:"F d, Y" }}</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr; gap: 24px;">
+    <!-- Professional Invoice Preview -->
+    <div style="background: #fff; border: 1px solid rgba(75, 73, 172, 0.18); border-radius: 16px; box-shadow: 0 10px 24px rgba(75, 73, 172, 0.10);" class="invoice-preview">
+      <div style="padding: 32px;">
+        <!-- Invoice Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; border-bottom: 2px solid #4B49AC; padding-bottom: 20px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+              {% if profile and profile.logo %}
+                <img src="{{ profile.logo.url }}" 
+                     alt="{{ profile.business_name|default:profile.legal_name|default:'Logo' }}"
+                     style="height: 40px; width: auto; border-radius: 8px; object-fit: contain;">
+                <h2 style="margin: 0; color: #4B49AC; font-size: 1.5rem;">
+                  {{ profile.business_name|default:profile.legal_name }}
+                </h2>
+              {% else %}
+                <!-- Fallback a BudsiDesk -->
+                <img src="{% static 'logo2.png' %}" alt="BudsiDesk" style="height: 40px; width: auto;">
+                <h2 style="margin: 0; color: #4B49AC; font-size: 1.5rem;">BudsiDesk</h2>
+              {% endif %}
+            </div>
+            
+            <!-- Bill From Details -->
+            {% if profile %}
+            <p style="margin: 4px 0; color: #2a3550; font-weight: 600;">{{ profile.business_name|default:profile.legal_name }}</p>
+            {% if profile.addr_line1 %}<p style="margin: 2px 0; color: #6b7a90; font-size: 0.9rem;">{{ profile.addr_line1 }}</p>{% endif %}
+            {% if profile.city or profile.country %}<p style="margin: 2px 0; color: #6b7a90; font-size: 0.9rem;">{{ profile.city }} {{ profile.country }}</p>{% endif %}
+            {% if profile.phone %}<p style="margin: 2px 0; color: #6b7a90; font-size: 0.9rem;">Phone: {{ profile.phone }}</p>{% endif %}
+            <p style="margin: 2px 0; color: #6b7a90; font-size: 0.9rem;">Email: {{ request.user.email }}</p>
+            {% if profile.vat_number %}<p style="margin: 2px 0; color: #6b7a90; font-size: 0.9rem;">VAT: {{ profile.vat_number }}</p>{% endif %}
+            {% endif %}
+          </div>
+          
+          <div style="text-align: right;">
+            <h3 style="margin: 0; color: #4B49AC; font-size: 1.3rem;">INVOICE</h3>
+            <p style="margin: 8px 0 4px; color: #2a3550; font-weight: 600;">#{{ invoice.invoice_number }}</p>
+            <p style="margin: 0; color: #6b7a90; font-size: 0.9rem;">Date: {{ invoice.date|date:"M d, Y" }}</p>
+            <p style="margin: 4px 0 0; color: #6b7a90; font-size: 0.9rem;">
+              Status: 
+              <span style="padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; 
+                {% if invoice.status == 'paid' %}background: #d4edda; color: #155724;
+                {% elif invoice.status == 'pending' %}background: #fff3cd; color: #856404;
+                {% elif invoice.status == 'overdue' %}background: #f8d7da; color: #721c24;
+                {% else %}background: #e2e3e5; color: #383d41;{% endif %}">
+                {{ invoice.status|default:"draft"|title }}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Bill From / Bill To -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 32px;">
+          <div>
+            <h4 style="margin: 0 0 12px; color: #4B49AC; font-size: 1rem;">Bill From</h4>
+            <div style="background: #f8f9ff; padding: 16px; border-radius: 8px;">
+              <p style="margin: 0 0 8px; font-weight: 600; color: #2a3550;">
+                {% if profile %}
+                  {{ profile.business_name|default:profile.legal_name }}
+                {% else %}
+                  {{ request.user.get_full_name|default:request.user.username }}
+                {% endif %}
+              </p>
+              {% if profile and profile.addr_line1 %}
+                <p style="margin: 4px 0; color: #6b7a90; font-size: 0.9rem;">{{ profile.addr_line1 }}</p>
+              {% endif %}
+              {% if profile and profile.city %}
+                <p style="margin: 4px 0; color: #6b7a90; font-size: 0.9rem;">
+                  {{ profile.city }}{% if profile.country %}, {{ profile.country }}{% endif %}
+                </p>
+              {% endif %}
+              {% if profile and profile.phone %}
+                <p style="margin: 4px 0; color: #6b7a90; font-size: 0.9rem;">
+                  Phone: {{ profile.phone }}
+                </p>
+              {% endif %}
+              <p style="margin: 4px 0; color: #6b7a90; font-size: 0.9rem;">
+                Email: {{ request.user.email }}
+              </p>
+              {% if profile and profile.vat_number %}
+                <p style="margin: 4px 0; color: #6b7a90; font-size: 0.9rem;">VAT: {{ profile.vat_number }}</p>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div>
+            <h4 style="margin: 0 0 12px; color: #4B49AC; font-size: 1rem;">Bill To</h4>
+            <div style="background: #f8f9ff; padding: 16px; border-radius: 8px;">
+              <p style="margin: 0 0 8px; font-weight: 600; color: #2a3550;">{{ invoice.contact.name }}</p>
+              
+              <!-- Client Address Information -->
+              {% if invoice.contact.address_line1 %}
+                <p style="margin: 4px 0; color: #6b7a90; font-size: 0.9rem;">{{ invoice.contact.address_line1 }}</p>
+              {% endif %}
+              
+              {% if invoice.contact.city or invoice.contact.country %}
+                <p style="margin: 4px 0; color: #6b7a90; font-size: 0.9rem;">
+                  {{ invoice.contact.city }}{% if invoice.contact.country %}, {{ invoice.contact.country }}{% endif %}
+                </p>
+              {% endif %}
+              
+              {% if invoice.contact.email %}
+                <p style="margin: 4px 0; color: #6b7a90; font-size: 0.9rem;">{{ invoice.contact.email }}</p>
+              {% endif %}
+              
+              {% if invoice.contact.cellphone %}
+                <p style="margin: 4px 0; color: #6b7a90; font-size: 0.9rem;">Phone: {{ invoice.contact.cellphone }}</p>
+              {% endif %}
+              
+              {% if invoice.contact.tax_id %}
+                <p style="margin: 4px 0; color: #6b7a90; font-size: 0.9rem;">Tax ID: {{ invoice.contact.tax_id }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Invoice Items Table -->
+        <div style="margin-bottom: 24px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #f8f9ff;">
+                <th style="text-align: left; padding: 12px 16px; border-bottom: 2px solid rgba(75, 73, 172, 0.3); color: #4B49AC; font-weight: 600;">Description</th>
+                <th style="text-align: center; padding: 12px 16px; border-bottom: 2px solid rgba(75, 73, 172, 0.3); color: #4B49AC; font-weight: 600; width: 80px;">Qty</th>
+                <th style="text-align: right; padding: 12px 16px; border-bottom: 2px solid rgba(75, 73, 172, 0.3); color: #4B49AC; font-weight: 600; width: 120px;">Unit Price</th>
+                <th style="text-align: right; padding: 12px 16px; border-bottom: 2px solid rgba(75, 73, 172, 0.3); color: #4B49AC; font-weight: 600; width: 120px;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if concepts %}
+                {% for concept in concepts %}
+                <tr>
+                  <td style="padding: 12px 16px; border-bottom: 1px solid #eee; color: #2a3550;">{{ concept.description }}</td>
+                  <td style="padding: 12px 16px; border-bottom: 1px solid #eee; text-align: center; color: #2a3550;">{{ concept.quantity }}</td>
+                  <td style="padding: 12px 16px; border-bottom: 1px solid #eee; text-align: right; color: #2a3550;">€{{ concept.unit_price }}</td>
+                  <td style="padding: 12px 16px; border-bottom: 1px solid #eee; text-align: right; color: #2a3550; font-weight: 600;">
+                    €{{ concept.quantity|multiply:concept.unit_price|floatformat:2 }}
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="4" style="padding: 24px; text-align: center; color: #6b7a90;">No items found</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totals -->
+        <div style="display: flex; justify-content: flex-end;">
+          <div style="width: 300px;">
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+              <span style="color: #6b7a90;">Subtotal:</span>
+              <span style="font-weight: 600;">€{{ invoice.subtotal }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+              <span style="color: #6b7a90;">VAT:</span>
+              <span style="font-weight: 600;">€{{ invoice.vat_amount }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid #4B49AC;">
+              <span style="color: #4B49AC; font-weight: 700; font-size: 1.1rem;">Total:</span>
+              <span style="color: #4B49AC; font-weight: 700; font-size: 1.1rem;">€{{ invoice.total }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        {% if invoice.description %}
+        <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #eee;">
+          <h4 style="margin: 0 0 12px; color: #4B49AC; font-size: 1rem;">Notes</h4>
+          <div style="background: #f8f9fa; padding: 16px; border-radius: 8px;">
+            {{ invoice.description|linebreaks }}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #6b7a90; font-size: 0.9rem;">
+          <p>Thank you for your business!</p>
+          {% if profile and profile.payment_terms %}
+          <p>Payment terms: {{ profile.payment_terms }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions at bottom -->
+  <div style="margin-top: 32px; display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
+    <button onclick="window.print()" 
+            style="background: #4B49AC; color: white; border: none; border-radius: 12px; padding: 12px 24px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+      <i class="fas fa-print"></i> Print / Save as PDF
+    </button>
+    
+    {% if invoice.original_file %}
+    <a href="{{ invoice.original_file.url }}" download 
+       style="background: #fff; border: 2px solid #4B49AC; color: #4B49AC; border-radius: 12px; padding: 12px 24px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+      <i class="fas fa-download"></i> Download Original
+    </a>
+    {% endif %}
+    
+    <a href="{% url 'main_invoice' %}" 
+       style="background: #f8f9fa; border: 1px solid #ddd; color: #6b7a90; border-radius: 12px; padding: 12px 24px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+      <i class="fas fa-arrow-left"></i> Back to List
+    </a>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .invoice-preview, .invoice-preview * {
+    visibility: visible;
+  }
+  .invoice-preview {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #f8f9ff;
+  border: 1px solid rgba(75, 73, 172, 0.2);
+  color: #4B49AC;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.action-btn:hover {
+  background: #4B49AC;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(75, 73, 172, 0.3);
+}
+</style>
+
+{% endblock %}

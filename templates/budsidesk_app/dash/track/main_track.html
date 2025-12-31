@@ -1,0 +1,1223 @@
+{% extends 'budsidesk_app/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load plan_tags %}
+
+{% block content %}
+<style>
+  :root{
+    --primary-1:#4B49AC; --primary-2:#98BDFF;
+    --supporting-1:#7DA0FA; --supporting-2:#7978E9; --supporting-3:#F3797E;
+    --white:#fff; --gray-light:#f8f9ff; --gray-border:#e0e7ff;
+    --amber:#f39c12; --purple:#8b5cf6;
+    --success:#10b981; --warning:#f59e0b; --error:#ef4444;
+  }
+  
+  /* Estilos para candados */
+  .locked-btn {
+    background-color: #95a5a6 !important;
+    color: #7f8c8d !important;
+    cursor: not-allowed !important;
+    position: relative;
+    padding-left: 2.5rem !important;
+  }
+
+  .locked-btn:hover {
+    background-color: #7f8c8d !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .lock-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+  }
+
+  .upgrade-prompt {
+    background: linear-gradient(135deg, #ffd700, #f39c12);
+    color: #2c3e50;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .upgrade-prompt a {
+    color: var(--primary-1);
+    text-decoration: underline;
+    font-weight: 700;
+  }
+
+  .plan-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
+
+  .badge-elite {
+    background: linear-gradient(135deg, #ffd700, #f39c12);
+    color: #2c3e50;
+  }
+
+  .badge-smart {
+    background: linear-gradient(135deg, #7DA0FA, #4B49AC);
+    color: white;
+  }
+
+  .locked-section {
+    position: relative;
+    opacity: 0.7;
+  }
+
+  .locked-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    z-index: 10;
+  }
+
+  .locked-content {
+    text-align: center;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--supporting-1);
+  }
+
+  /* Resto de los estilos existentes se mantienen igual */
+  .dashboard-container{
+    display:grid;
+    grid-template-columns:1fr 350px;
+    gap:2rem;
+    max-width:1400px;
+    margin:0 auto;
+    padding:20px;
+  }
+  
+  .main-content{
+    display:flex;
+    flex-direction:column;
+    gap:2rem;
+  }
+  
+  .tracker-header{
+    background:linear-gradient(135deg, #ffffff, #7DA0FA);
+    color:white;
+    padding:2rem 0;
+    margin-bottom:1rem;
+    border-radius:0 0 1rem 1rem;
+  }
+  
+  .header-content{
+    max-width:1400px;
+    margin:0 auto;
+    padding:0 1rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  
+  .header-title h1{
+    margin:0;
+    color:#4B49AC;
+    font-size:2rem;
+    font-weight:700;
+  }
+  
+  .header-title p{
+    margin:0.5rem 0 0;
+    color:#4B49AC;
+    font-size:1.1rem;
+  }
+  
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    padding:12px 24px;
+    border-radius:12px;
+    font-weight:600;
+    border:none;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    text-decoration:none;
+  }
+  
+  .btn-primary{
+    background:linear-gradient(135deg, var(--supporting-2), var(--primary-1));
+    color:var(--white);
+    box-shadow:0 4px 12px rgba(75, 73, 172, 0.3);
+  }
+  
+  .btn-primary:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(75, 73, 172, 0.4);
+  }
+  
+  /* Stats Grid */
+  .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1.5rem;
+    margin-bottom:1rem;
+  }
+  
+  .stat-card{
+    background:var(--white);
+    border:1px solid var(--gray-border);
+    border-radius:1rem;
+    box-shadow:0 4px 12px rgba(75, 73, 172, 0.1);
+    padding:1.5rem;
+    text-align:center;
+    transition:all 0.3s ease;
+    border-top:4px solid var(--primary-1);
+  }
+  
+  .stat-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 8px 20px rgba(75, 73, 172, 0.15);
+  }
+  
+  .stat-icon{
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    margin:0 auto .75rem;
+    font-size:1.5rem;
+  }
+  
+  .stat-icon.blue{ background:linear-gradient(135deg, #dbeafe, #e0e7ff); color:var(--primary-1); }
+  .stat-icon.primary{ background:linear-gradient(135deg, #e0e7ff, #f0f4ff); color:var(--supporting-1); }
+  .stat-icon.supporting{ background:linear-gradient(135deg, #f0f4ff, #f8f9ff); color:var(--supporting-2); }
+  .stat-icon.purple{ background:linear-gradient(135deg, #ede9fe, #f0f4ff); color:var(--purple); }
+  
+  .stat-info p{
+    margin:0;
+    color:var(--primary-2);
+    font-size:.875rem;
+    font-weight:500;
+  }
+  
+  .stat-info h3{
+    margin:0.5rem 0 0;
+    color:var(--primary-1);
+    font-size:1.75rem;
+    font-weight:700;
+  }
+  
+  /* Project Cards */
+  .projects-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:1.5rem;
+  }
+  
+  .project-card{
+    background:var(--white);
+    border:1px solid var(--gray-border);
+    border-radius:1rem;
+    box-shadow:0 4px 12px rgba(75, 73, 172, 0.1);
+    padding:1.5rem;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  
+  .project-card::before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    height:4px;
+    background:linear-gradient(135deg, var(--supporting-1), var(--primary-1));
+  }
+  
+  .project-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 8px 20px rgba(75, 73, 172, 0.2);
+    border-color:var(--supporting-1);
+  }
+  
+  .project-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:1rem;
+  }
+  
+  .project-info{
+    display:flex;
+    gap:.75rem;
+    align-items:center;
+  }
+  
+  .project-color{
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--supporting-1), var(--primary-1));
+  }
+  
+  .project-name{
+    margin:0;
+    color:var(--primary-1);
+    font-weight:700;
+    font-size:1.2rem;
+  }
+  
+  .project-stage{
+    margin:0.25rem 0 0;
+    color:var(--primary-2);
+    font-size:.9rem;
+  }
+  
+  .status-badge{
+    display:inline-flex;
+    align-items:center;
+    padding:4px 8px;
+    border-radius:20px;
+    font-size:0.75rem;
+    font-weight:600;
+    margin-right:0.5rem;
+  }
+  
+  .status-active{ background:rgba(125, 160, 250, 0.1); color:var(--supporting-1); }
+  .status-completed{ background:rgba(75, 73, 172, 0.1); color:var(--primary-1); }
+  
+  .progress-section{
+    margin:1rem 0;
+  }
+  
+  .progress-info{
+    display:flex;
+    justify-content:space-between;
+    font-size:.875rem;
+    margin-bottom:.5rem;
+    color:var(--primary-1);
+    font-weight:500;
+  }
+  
+  .progress-bar{
+    height:8px;
+    background:var(--gray-light);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(135deg, var(--supporting-1), var(--primary-1));
+    border-radius:10px;
+    transition:width 0.5s ease;
+  }
+  
+  .project-dates{
+    display:flex;
+    align-items:center;
+    color:var(--primary-2);
+    font-size:.9rem;
+    margin:1rem 0;
+    padding:0.75rem;
+    background:var(--gray-light);
+    border-radius:8px;
+  }
+  
+  .dates-icon{
+    margin-right:.5rem;
+    color:var(--supporting-1);
+  }
+  
+  .financial-summary{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:.75rem;
+    background:linear-gradient(135deg, var(--gray-light), #f0f2ff);
+    border-radius:12px;
+    padding:1rem;
+    border:1px solid var(--gray-border);
+  }
+  
+  .financial-item{
+    text-align:center;
+  }
+  
+  .financial-label{
+    color:var(--primary-2);
+    font-size:.75rem;
+    margin:0 0 .25rem;
+    font-weight:500;
+  }
+  
+  .financial-value{
+    font-weight:700;
+    font-size:0.9rem;
+  }
+  
+  .value-earned{ color:var(--supporting-1); }
+  .value-spent{ color:var(--supporting-3); }
+  .value-profit{ color:var(--supporting-2); }
+  
+  /* Top Projects */
+  .top-project{
+    background:var(--white);
+    border:1px solid var(--gray-border);
+    border-left:6px solid var(--supporting-1);
+    border-radius:1rem;
+    box-shadow:0 4px 12px rgba(75, 73, 172, 0.1);
+    padding:1.5rem;
+    transition:all 0.3s ease;
+  }
+  
+  .top-project:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(75, 73, 172, 0.15);
+  }
+  
+  .top-project-header{
+    display:flex;
+    align-items:center;
+    gap:.75rem;
+    margin-bottom:1rem;
+  }
+  
+  .top-project-icon{
+    background:linear-gradient(135deg, var(--supporting-1), var(--primary-1));
+    color:var(--white);
+    border-radius:12px;
+    padding:.75rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  
+  .top-project-title{
+    margin:0;
+    color:var(--primary-1);
+    font-size:1.3rem;
+    font-weight:700;
+  }
+  
+  /* Calendar */
+  .calendar-sidebar{
+    background:var(--white);
+    border-radius:1rem;
+    box-shadow:0 4px 12px rgba(75, 73, 172, 0.1);
+    padding:1.5rem;
+    border-top:6px solid var(--supporting-2);
+    height:fit-content;
+    position:sticky;
+    top:20px;
+  }
+  
+  .calendar-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:1rem;
+  }
+  
+  .calendar-header h3{
+    color:var(--primary-1);
+    margin:0;
+    font-weight:700;
+  }
+  
+  .calendar-nav{
+    display:flex;
+    gap:.4rem;
+  }
+  
+  .calendar-nav button{
+    background:var(--primary-1);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    width:32px;
+    height:32px;
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+    transition:all 0.3s ease;
+  }
+  
+  .calendar-nav button:hover{
+    background:var(--supporting-2);
+    transform:scale(1.1);
+  }
+  
+  .weekdays{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    text-align:center;
+    color:var(--primary-1);
+    font-weight:700;
+    font-size:.8rem;
+    margin-bottom:.5rem;
+  }
+  
+  .days-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:.25rem;
+  }
+  
+  .day-cell{
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    font-size:.9rem;
+    transition:all 0.3s ease;
+    cursor:pointer;
+  }
+  
+  .day-cell:hover{
+    background:var(--gray-light);
+  }
+  
+  .day-cell.today{
+    background:linear-gradient(135deg, var(--primary-1), var(--supporting-1));
+    color:#fff;
+    font-weight:700;
+    transform:scale(1.1);
+  }
+  
+  .day-cell.other-month{
+    color:#c7c7c7;
+  }
+  
+  .calendar-events{
+    margin-top:1.5rem;
+    border-top:1px solid var(--gray-border);
+    padding-top:1.5rem;
+  }
+  
+  .calendar-events h4{
+    color:var(--primary-1);
+    margin-bottom:1rem;
+    font-weight:700;
+  }
+  
+  .calendar-event{
+    background:var(--gray-light);
+    border-radius:8px;
+    padding:.75rem;
+    margin-bottom:.5rem;
+    border-left:4px solid var(--supporting-1);
+    transition:all 0.3s ease;
+  }
+  
+  .calendar-event:hover{
+    background:var(--white);
+    box-shadow:0 2px 8px rgba(75, 73, 172, 0.1);
+  }
+  
+  /* Modal Styles */
+  .modal{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.5);
+    z-index:1000;
+    align-items:center;
+    justify-content:center;
+    backdrop-filter:blur(4px);
+  }
+  
+  .modal-content{
+    background:white;
+    border-radius:1rem;
+    width:90%;
+    max-width:500px;
+    padding:0;
+    box-shadow:0 20px 40px rgba(75, 73, 172, 0.2);
+    border:1px solid var(--gray-border);
+  }
+  
+  .modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:1.5rem;
+    border-bottom:1px solid var(--gray-border);
+    background:linear-gradient(135deg, #f8f9ff, var(--gray-light));
+  }
+  
+  .modal-title{
+    margin:0;
+    color:var(--primary-1);
+    font-size:1.25rem;
+    font-weight:700;
+  }
+  
+  .close-btn{
+    background:none;
+    border:none;
+    font-size:1.5rem;
+    cursor:pointer;
+    color:var(--primary-2);
+    transition:all 0.3s ease;
+  }
+  
+  .close-btn:hover{
+    color:var(--supporting-3);
+    transform:scale(1.1);
+  }
+  
+  .form-group{
+    margin-bottom:1.25rem;
+    padding:0 1.5rem;
+  }
+  
+  .form-label{
+    display:block;
+    margin-bottom:0.5rem;
+    color:var(--primary-1);
+    font-weight:600;
+  }
+  
+  .form-input{
+    width:100%;
+    padding:0.75rem;
+    border:1px solid var(--gray-border);
+    border-radius:8px;
+    font-size:0.875rem;
+    transition:all 0.3s ease;
+    background:var(--white);
+  }
+  
+  .form-input:focus{
+    outline:none;
+    border-color:var(--supporting-1);
+    box-shadow:0 0 0 3px rgba(125, 160, 250, 0.1);
+  }
+  
+  .modal-actions{
+    display:flex;
+    gap:1rem;
+    justify-content:flex-end;
+    padding:1.5rem;
+    border-top:1px solid var(--gray-border);
+    background:var(--gray-light);
+  }
+  
+  .btn-secondary{
+    background:var(--white);
+    color:var(--primary-1);
+    border:2px solid var(--primary-1);
+    border-radius:12px;
+    padding:12px 24px;
+    font-weight:600;
+  }
+  
+  .btn-secondary:hover{
+    background:var(--primary-1);
+    color:var(--white);
+    transform:translateY(-2px);
+  }
+  
+  /* Dropdown */
+  .dropdown{
+    position:relative;
+    display:inline-block;
+  }
+  
+  .dropdown-content{
+    display:none;
+    position:absolute;
+    right:0;
+    background:var(--white);
+    min-width:160px;
+    box-shadow:0 8px 16px rgba(75, 73, 172, 0.15);
+    border-radius:12px;
+    z-index:100;
+    border:1px solid var(--gray-border);
+    overflow:hidden;
+  }
+  
+  .dropdown-content button{
+    width:100%;
+    text-align:left;
+    background:none;
+    border:none;
+    padding:12px 16px;
+    cursor:pointer;
+    color:var(--primary-1);
+    transition:all 0.3s ease;
+    font-size:0.875rem;
+  }
+  
+  .dropdown-content button:hover{
+    background:var(--gray-light);
+  }
+  
+  .dropdown-content button.delete{
+    color:var(--supporting-3);
+  }
+  
+  .dropdown:hover .dropdown-content{
+    display:block;
+  }
+  
+  .action-btn{
+    background:var(--gray-light);
+    border:1px solid var(--gray-border);
+    color:var(--primary-1);
+    width:32px;
+    height:32px;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:all 0.3s ease;
+  }
+  
+  .action-btn:hover{
+    background:var(--primary-1);
+    color:var(--white);
+    transform:scale(1.1);
+  }
+  
+  @media (max-width:1024px){
+    .dashboard-container{grid-template-columns:1fr}
+    .stats-grid{grid-template-columns:repeat(2,1fr)}
+  }
+  
+  @media (max-width:768px){
+    .stats-grid{grid-template-columns:1fr}
+    .projects-grid{grid-template-columns:1fr}
+  }
+</style>
+
+<div class="project-tracker">
+  <!-- Header -->
+  <div class="tracker-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>Project Tracker</h1>
+        <p></p>
+      </div>
+      <div class="header-buttons">
+        {% if user|feature_available:"track_module" %}
+          <button class="btn btn-primary" id="new-project-btn">
+            <i class="fas fa-plus" style="margin-right:.5rem;"></i> New Project
+          </button>
+        {% else %}
+          <a href="{% url 'pricing' %}" class="btn btn-primary locked-btn">
+            <img src="{% static 'padlock.png' %}" alt="Locked" class="lock-icon">
+            Upgrade to Access Track
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  {% if not user|feature_available:"track_module" %}
+    <!-- Mensaje de upgrade para usuarios sin acceso -->
+    <div class="upgrade-prompt" style="max-width: 1400px; margin: 2rem auto;">
+      <p>🔒 Track module is available in Smart and Elite plans. <a href="{% url 'pricing' %}">Upgrade now</a> to manage your projects!</p>
+    </div>
+  {% else %}
+    <!-- Contenido principal para usuarios con acceso -->
+    <div class="dashboard-container">
+      <div class="main-content">
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="fas fa-folder-open"></i></div>
+            <div class="stat-info">
+              <p>Active Projects</p>
+              <h3>{{ active_projects_count }}</h3>
+            </div>
+          </div>
+          
+          <!-- Estadísticas financieras - Solo para Elite -->
+          {% if user|feature_available:"track_advanced" %}
+            <div class="stat-card">
+              <div class="stat-icon primary"><i class="fas fa-euro-sign"></i></div>
+              <div class="stat-info">
+                <p>Total Revenue</p>
+                <h3>€{{ total_earned|floatformat:2|intcomma }}</h3>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon supporting"><i class="fas fa-receipt"></i></div>
+              <div class="stat-info">
+                <p>Total Spent</p>
+                <h3>€{{ total_spent|floatformat:2|intcomma }}</h3>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon purple"><i class="fas fa-piggy-bank"></i></div>
+              <div class="stat-info">
+                <p>All Projects Total</p>
+                <h3>€{{ net_profit|floatformat:2|intcomma }}</h3>
+              </div>
+            </div>
+          {% else %}
+            <!-- Placeholder para Smart -->
+            <div class="stat-card locked-section">
+              <div class="stat-icon primary" style="background:linear-gradient(135deg, #e0e0e0, #b0b0b0); color: #7f8c8d;">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="stat-info">
+                <p>Financial Analytics</p>
+                <h3><span class="plan-badge badge-elite">ELITE</span></h3>
+              </div>
+              <div class="locked-overlay">
+                <div class="locked-content">
+                  <img src="{% static 'padlock.png' %}" alt="Locked" style="width: 32px; height: 32px; margin-bottom: 0.5rem;">
+                  <p style="margin: 0; font-weight: 600; color: var(--primary-1);">Upgrade to Elite for Financial Analytics</p>
+                  <a href="{% url 'pricing' %}" class="btn btn-primary" style="margin-top: 0.5rem; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                    Upgrade Now
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="stat-card locked-section">
+              <div class="stat-icon supporting" style="background:linear-gradient(135deg, #e0e0e0, #b0b0b0); color: #7f8c8d;">
+                <i class="fas fa-chart-bar"></i>
+              </div>
+              <div class="stat-info">
+                <p>Advanced Reports</p>
+                <h3><span class="plan-badge badge-elite">ELITE</span></h3>
+              </div>
+              <div class="locked-overlay">
+                <div class="locked-content">
+                  <img src="{% static 'padlock.png' %}" alt="Locked" style="width: 32px; height: 32px; margin-bottom: 0.5rem;">
+                  <p style="margin: 0; font-weight: 600; color: var(--primary-1);">Upgrade to Elite for Advanced Reports</p>
+                  <a href="{% url 'pricing' %}" class="btn btn-primary" style="margin-top: 0.5rem; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                    Upgrade Now
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Project Cards -->
+        <div class="projects-grid" id="projects-container">
+          {% for data in projects_data %}
+            {% with p=data.project %}
+            <div class="project-card" onclick="{% if user|feature_available:'track_advanced' %}editProjectDates({{ p.id }}){% else %}showUpgradePrompt(){% endif %}">
+              <div class="project-header">
+                <div class="project-info">
+                  <div class="project-color"></div>
+                  <div>
+                    <h3 class="project-name">{{ p.name }}</h3>
+                   
+                  </div>
+                </div>
+                <div class="dropdown">
+                  <button class="action-btn"><i class="fas fa-ellipsis-h"></i></button>
+                  <div class="dropdown-content">
+                    {% if user|feature_available:"track_advanced" %}
+                      <button onclick="event.stopPropagation(); editProjectDates({{ p.id }})">Adjust Dates</button>
+                      <button class="delete" onclick="event.stopPropagation(); archiveProject({{ p.id }})">
+                        {% if p.is_active %}Archive{% else %}Activate{% endif %}
+                      </button>
+                    {% else %}
+                      <button onclick="event.stopPropagation(); showUpgradePrompt()">Adjust Dates <span class="plan-badge badge-elite" style="margin-left: 0.5rem;">ELITE</span></button>
+                      <button class="delete" onclick="event.stopPropagation(); showUpgradePrompt()">
+                        Archive/Activate <span class="plan-badge badge-elite" style="margin-left: 0.5rem;">ELITE</span>
+                      </button>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="progress-section">
+                <div class="progress-info">
+                  <span>Progress</span>
+                  <span>{{ data.progress }}%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: {{ data.progress }}%;"></div>
+                </div>
+              </div>
+
+              <div class="project-dates">
+                <i class="fas fa-calendar-alt dates-icon"></i>
+                <span>{{ p.start_date|date:"M d, Y" }} - {{ p.end_date|date:"M d, Y" }}</span>
+              </div>
+
+              <!-- Financial Summary - Solo para Elite -->
+              {% if user|feature_available:"track_advanced" %}
+                <div class="financial-summary">
+                  <div class="financial-item">
+                    <p class="financial-label">Expenses</p>
+                    <p class="financial-value value-spent">€{{ data.spent|floatformat:2|intcomma }}</p>
+                  </div>
+                  <div class="financial-item">
+                    <p class="financial-label">Revenue</p>
+                    <p class="financial-value value-earned">€{{ data.earned|floatformat:2|intcomma }}</p>
+                  </div>
+                  <div class="financial-item">
+                    <p class="financial-label">Your Profit</p>
+                    <p class="financial-value value-profit">
+                      €{{ data.profit|floatformat:2|intcomma }}
+                    </p>
+                  </div>
+                </div>
+              {% else %}
+                <div class="financial-summary locked-section" style="position: relative;">
+                  <div style="text-align: center; padding: 1rem;">
+                    <img src="{% static 'padlock.png' %}" alt="Locked" style="width: 24px; height: 24px; margin-bottom: 0.5rem;">
+                    <p style="margin: 0; font-size: 0.875rem; color: var(--primary-2); font-weight: 600;">
+                      Upgrade to Elite for Financial Analytics
+                    </p>
+                    <a href="{% url 'pricing' %}" class="download-btn" style="margin-top: 0.5rem; padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                      Upgrade Now
+                    </a>
+                  </div>
+                  <div class="locked-overlay">
+                    <div class="locked-content">
+                      <img src="{% static 'padlock.png' %}" alt="Locked" style="width: 32px; height: 32px; margin-bottom: 0.5rem;">
+                      <p style="margin: 0; font-weight: 600; color: var(--primary-1);">Financial Analytics - Elite Feature</p>
+                      <a href="{% url 'pricing' %}" class="btn btn-primary" style="margin-top: 0.5rem; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                        Upgrade to Elite
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+            {% endwith %}
+          {% endfor %}
+        </div>
+
+        <!-- Most Profitable Project - Solo para Elite -->
+        {% if user|feature_available:"track_advanced" and profitable_project %}
+        <div class="top-project">
+          <div class="top-project-header">
+            <div class="top-project-icon"><i class="fas fa-trophy"></i></div>
+            <h3 class="top-project-title">Most Profitable Project</h3>
+          </div>
+          <div class="top-project-details">
+            <h4 style="margin:0;color:var(--primary-1);font-size:1.1rem">{{ profitable_project.project.name }}</h4>
+            <p style="margin:0.5rem 0 0;color:var(--supporting-1);font-weight:600;font-size:1.2rem">
+              €{{ profitable_project.profit|floatformat:2|intcomma }} profit
+            </p>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Best Projects - Solo para Elite -->
+        {% if user|feature_available:"track_advanced" and projects_data %}
+          {% with sorted=projects_data|dictsortreversed:"profit" %}
+          <div class="top-project">
+            <div class="top-project-header">
+              <div class="top-project-icon"><i class="fas fa-ranking-star"></i></div>
+              <h3 class="top-project-title">Best Projects (Top {{ sorted|slice:":5"|length }})</h3>
+            </div>
+            <ol style="margin:0;padding-left:1.25rem;color:var(--primary-1);">
+              {% for item in sorted|slice:":5" %}
+                <li style="margin:.5rem 0;padding:0.5rem;background:var(--gray-light);border-radius:8px;">
+                  <strong style="color:var(--primary-1);">{{ item.project.name }}</strong> 
+                  <span style="color:var(--primary-2);font-size:0.9rem;">
+                    — Profit: €{{ item.profit|floatformat:2|intcomma }}
+                    {% if item.earned %}({% widthratio item.profit item.earned 100 %}% margin){% endif %}
+                  </span>
+                </li>
+              {% endfor %}
+            </ol>
+          </div>
+          {% endwith %}
+        {% endif %}
+      </div>
+
+      <!-- Calendar Sidebar - Disponible para Smart y Elite -->
+      <div class="calendar-sidebar">
+        <div class="calendar-header">
+          <h3 id="current-month">{{ current_month }}</h3>
+          <div class="calendar-nav">
+            <button id="prev-month" aria-label="Previous month"><i class="fas fa-chevron-left"></i></button>
+            <button id="next-month" aria-label="Next month"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="weekdays">
+          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div class="days-grid" id="calendar-days"></div>
+        <div class="calendar-events" id="calendar-events">
+          <h4>Project Timeline</h4>
+          {% for data in projects_data %}
+            <div class="calendar-event start">
+              <strong>{{ data.project.start_date|date:"M d" }}</strong>: {{ data.project.name }} started
+            </div>
+            <div class="calendar-event end">
+              <strong>{{ data.project.end_date|date:"M d" }}</strong>: {{ data.project.name }} deadline
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Modal Create Project -->
+<div class="modal" id="project-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Create New Project</h3>
+      <button class="close-btn" id="close-modal">&times;</button>
+    </div>
+    <form id="project-form" method="POST" action="{% url 'create_project_view' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label" for="project-name">Project Name</label>
+        <input class="form-input" id="project-name" name="project_name" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="project-description">Description</label>
+        <textarea class="form-input" id="project-description" name="project_description" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="start-date">Start Date</label>
+        <input type="date" class="form-input" id="start-date" name="start_date" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="end-date">End Date</label>
+        <input type="date" class="form-input" id="end-date" name="end_date" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+        <button class="btn btn-primary" type="submit">Create Project</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Dates Modal -->
+<div class="modal" id="edit-dates-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Adjust Project Dates</h3>
+      <button class="close-btn" id="close-edit-modal">&times;</button>
+    </div>
+    <form id="edit-dates-form" method="POST">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label" for="edit-project-name">Project</label>
+        <input type="text" class="form-input" id="edit-project-name" readonly style="background:var(--gray-light);">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-start-date">Start Date</label>
+        <input type="date" class="form-input" id="edit-start-date" name="start_date" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-end-date">End Date</label>
+        <input type="date" class="form-input" id="edit-end-date" name="end_date" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="cancel-edit-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Dates</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+  function showUpgradePrompt() {
+    alert('This feature is available in Elite plan. Upgrade to access advanced project analytics and financial tracking.');
+    window.location.href = "{% url 'pricing' %}";
+  }
+
+  // CSRF
+  function getCookie(n){const v=`; ${document.cookie}`.split(`; ${n}=`);return v.length===2?v.pop().split(';').shift():null;}
+
+  // Calendar data from server
+  const projectDates = [
+    {% for d in projects_data %}
+    {name:"{{ d.project.name|escapejs }}",start:"{{ d.project.start_date|date:'Y-m-d' }}",end:"{{ d.project.end_date|date:'Y-m-d' }}",profit:{{ d.profit|default:0 }} },
+    {% endfor %}
+  ];
+
+  let currentDate=new Date(), currentMonth=currentDate.getMonth(), currentYear=currentDate.getFullYear();
+  const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  function generateCalendar(m,y){
+    const grid=document.getElementById('calendar-days'); if(!grid) return; grid.innerHTML='';
+    const f=new Date(y,m,1), l=new Date(y,m+1,0), firstIdx=f.getDay(), prevLast=new Date(y,m,0).getDate(), today=new Date();
+    for(let i=firstIdx;i>0;i--){const c=document.createElement('div');c.className='day-cell other-month';c.textContent=prevLast-i+1;grid.appendChild(c);}
+    for(let i=1;i<=l.getDate();i++){const c=document.createElement('div');c.className='day-cell'; if(i===today.getDate()&&m===today.getMonth()&&y===today.getFullYear()) c.classList.add('today');
+      const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+      const starts=projectDates.filter(p=>p.start===ds), ends=projectDates.filter(p=>p.end===ds);
+      if(starts.length||ends.length){c.style.outline='2px solid var(--supporting-1)';c.style.background='rgba(125, 160, 250, 0.1)';}
+      c.textContent=i; grid.appendChild(c);
+    }
+    const total=42, used=firstIdx+l.getDate(); for(let i=1;i<=total-used;i++){const c=document.createElement('div');c.className='day-cell other-month';c.textContent=i;grid.appendChild(c);}
+  }
+  
+  function updateMonthYear(){const el=document.getElementById('current-month'); if(el) el.textContent=`${months[currentMonth]} ${currentYear}`;}
+
+  function openModal(){
+    const m=document.getElementById('project-modal'); 
+    if(!m) return; 
+    m.style.display='flex';
+    const s=document.getElementById('start-date'), e=document.getElementById('end-date'); 
+    if(s) s.valueAsDate=new Date(); 
+    if(e){const d=new Date(); d.setDate(d.getDate()+30); e.valueAsDate=d;}
+  }
+  
+  function closeModal(){
+    const m=document.getElementById('project-modal'); 
+    const f=document.getElementById('project-form'); 
+    if(m) m.style.display='none'; 
+    if(f) f.reset();
+  }
+
+  function closeEditModal(){
+    const m=document.getElementById('edit-dates-modal'); 
+    if(m) m.style.display='none';
+  }
+
+  // Edit project dates functionality
+  function editProjectDates(projectId){
+    {% if user|feature_available:"track_advanced" %}
+      const projectCard = document.querySelector(`[onclick="editProjectDates(${projectId})"]`);
+      const projectName = projectCard?.querySelector('.project-name')?.textContent;
+      
+      if(projectName){
+        document.getElementById('edit-project-name').value = projectName;
+        document.getElementById('edit-dates-modal').style.display = 'flex';
+        
+        // Set current dates as default
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 30);
+        
+        document.getElementById('edit-start-date').valueAsDate = startDate;
+        document.getElementById('edit-end-date').valueAsDate = endDate;
+      }
+    {% else %}
+      showUpgradePrompt();
+    {% endif %}
+  }
+
+  // Form submission for date editing
+  document.getElementById('edit-dates-form')?.addEventListener('submit', function(e){
+    e.preventDefault();
+    {% if user|feature_available:"track_advanced" %}
+      const projectName = document.getElementById('edit-project-name').value;
+      
+      if(projectName){
+        const formData = new FormData(this);
+        
+        // Find project ID by name (you might want to pass this differently in real implementation)
+        const projectCard = Array.from(document.querySelectorAll('.project-card')).find(card => 
+          card.querySelector('.project-name').textContent === projectName
+        );
+        
+        if(projectCard){
+          const projectId = projectCard.getAttribute('onclick').match(/\d+/)[0];
+          formData.append('project_id', projectId);
+          
+          fetch(`/projects/${projectId}/update-dates/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-CSRFToken': getCookie('csrftoken') || ''
+            }
+          })
+          .then(response => {
+            if(response.ok){
+              location.reload();
+            } else {
+              alert('Error updating dates');
+            }
+          })
+          .catch(() => alert('Network error'));
+        }
+      }
+    {% else %}
+      showUpgradePrompt();
+    {% endif %}
+  });
+
+  function archiveProject(id){
+    {% if user|feature_available:"track_advanced" %}
+      if(!confirm('Are you sure you want to change the project status?')) return;
+      fetch(`/projects/${id}/toggle-status/`,{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'X-CSRFToken':getCookie('csrftoken')||''
+        },
+        credentials:'same-origin'
+      })
+        .then(r=>r.ok?location.reload():alert('Could not change project status'))
+        .catch(()=>alert('Network error'));
+    {% else %}
+      showUpgradePrompt();
+    {% endif %}
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    // Calendar
+    document.getElementById('prev-month')?.addEventListener('click',()=>{
+      currentMonth--; 
+      if(currentMonth<0){currentMonth=11;currentYear--;} 
+      generateCalendar(currentMonth,currentYear); 
+      updateMonthYear();
+    });
+    
+    document.getElementById('next-month')?.addEventListener('click',()=>{
+      currentMonth++; 
+      if(currentMonth>11){currentMonth=0;currentYear++;} 
+      generateCalendar(currentMonth,currentYear); 
+      updateMonthYear();
+    });
+    
+    generateCalendar(currentMonth,currentYear); 
+    updateMonthYear();
+
+    // Modal - Solo si tiene acceso al módulo
+    {% if user|feature_available:"track_module" %}
+      document.getElementById('new-project-btn')?.addEventListener('click',openModal);
+    {% endif %}
+    
+    document.getElementById('close-modal')?.addEventListener('click',closeModal);
+    document.getElementById('cancel-btn')?.addEventListener('click',closeModal);
+    document.getElementById('close-edit-modal')?.addEventListener('click',closeEditModal);
+    document.getElementById('cancel-edit-btn')?.addEventListener('click',closeEditModal);
+  });
+
+  // Close modal when clicking outside
+  window.addEventListener('click', function(event) {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+  });
+</script>
+{% endblock %}

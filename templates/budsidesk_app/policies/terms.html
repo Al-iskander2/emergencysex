@@ -1,0 +1,245 @@
+{% extends 'budsidesk_app/base.html' %}
+{% load static %}
+
+
+{% block extra_css %}
+<style>
+.policy-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+   
+    color: #333;
+}
+
+.policy-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #98BDFF;
+    padding-bottom: 1rem;
+}
+
+.policy-header h1 {
+    color: #4B49AC;
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+}
+
+.last-updated {
+    color: #7f8c8d;
+    font-style: italic;
+    font-size: 1rem;
+}
+
+.policy-nav {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #98BDFF 0%, #7DA0FA 100%);
+    border-radius: 8px;
+    border: 1px solid #4B49AC;
+}
+
+.policy-nav a {
+    color: #4B49AC;
+    text-decoration: none;
+    margin: 0 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.policy-nav a:hover {
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.3);
+    color: #2c3e50;
+}
+
+.policy-content section {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(75, 73, 172, 0.1);
+    border-left: 4px solid #7978E9;
+}
+
+.policy-content h2 {
+    color: #4B49AC;
+    border-bottom: 1px solid #ecf0f1;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.policy-content ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.policy-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.policy-content strong {
+    color: #4B49AC;
+}
+
+.policy-content a {
+    color: #4B49AC;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.policy-content a:hover {
+    text-decoration: underline;
+    color: #7978E9;
+}
+
+.policy-content p {
+    margin-bottom: 1rem;
+}
+
+.highlight-box {
+    background-color: rgba(152, 189, 255, 0.1);
+    border: 1px solid #98BDFF;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.contact-highlight {
+    background-color: rgba(121, 120, 233, 0.1);
+    border-left: 4px solid #7978E9;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+@media (max-width: 768px) {
+    .policy-container {
+        padding: 1rem;
+    }
+    
+    .policy-header h1 {
+        font-size: 2rem;
+    }
+    
+    .policy-nav {
+        font-size: 0.9rem;
+    }
+    
+    .policy-nav a {
+        display: inline-block;
+        margin: 0.25rem;
+    }
+    
+    .policy-content section {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="policy-container">
+    <div class="policy-header">
+        <h1>Terms of Service</h1>
+        <p class="last-updated">Effective date: November 2025</p>
+    </div>
+
+    <nav class="policy-nav">
+        <a href="{% url 'privacy' %}">Privacy Policy</a> |
+        <a href="{% url 'terms' %}">Terms of Service</a> |
+        <a href="{% url 'cookies' %}">Cookie Policy</a> |
+        <a href="{% url 'refunds' %}">Refund Policy</a> |
+        <a href="{% url 'disclaimer' %}">Disclaimer</a> |
+        <a href="{% url 'legal' %}">Legal Notice</a> |
+        <a href="{% url 'accessibility' %}">Accessibility</a>
+    </nav>
+
+    <div class="policy-content">
+        <section>
+            <p>Welcome to BudsiDesk! These Terms govern your use of our website and services. By creating an account or using BudsiDesk, you agree to these Terms.</p>
+        </section>
+
+        <section>
+            <h2>Overview</h2>
+            <p>BudsiDesk provides online tools for managing invoices, expenses, taxes, and business projects. You are responsible for ensuring the accuracy of the information you enter.</p>
+        </section>
+
+        <section>
+            <h2>Accounts and Access</h2>
+            <p>You must:</p>
+            <ul>
+                <li>Be at least 18 years old.</li>
+                <li>Provide accurate registration information.</li>
+                <li>Keep your login details secure and confidential.</li>
+            </ul>
+            <p>BudsiDesk is not liable for any loss arising from unauthorised account use.</p>
+        </section>
+
+        <section>
+            <h2>Subscriptions and Payments</h2>
+            <ul>
+                <li>BudsiDesk operates on a subscription basis (monthly or annual).</li>
+                <li>Fees are displayed before purchase.</li>
+                <li>All payments are handled securely by third-party processors.</li>
+                <li>Refunds follow our <a href="{% url 'refunds' %}">Refund Policy</a>.</li>
+            </ul>
+            <p>Failure to pay may result in suspension or termination of your account.</p>
+        </section>
+
+        <section>
+            <h2>Acceptable Use</h2>
+            <p>You agree <strong>not</strong> to:</p>
+            <ul>
+                <li>Use BudsiDesk for unlawful or fraudulent purposes.</li>
+                <li>Upload harmful or malicious files.</li>
+                <li>Share or resell your account access.</li>
+                <li>Reverse engineer or interfere with our systems.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Data Ownership and Responsibility</h2>
+            <p>You own all data and content you upload to BudsiDesk. We only process it to provide the service. BudsiDesk is <strong>not responsible</strong> for the accuracy of accounting or tax outcomes you remain responsible for verifying your financial data.</p>
+        </section>
+
+        <section>
+            <h2>Intellectual Property</h2>
+            <p>All BudsiDesk trademarks, software, and materials are owned by BudsiDesk Ltd. You may not copy or reproduce them without written permission.</p>
+        </section>
+
+        <section>
+            <h2>Termination</h2>
+            <p>You may cancel your subscription at any time. We may suspend or terminate your account for violations of these Terms or non-payment. Upon termination, your access ends, but you can export your data before closure.</p>
+        </section>
+
+        <section>
+            <h2>Liability Disclaimer</h2>
+            <p>BudsiDesk is provided "as is" without warranties of any kind.</p>
+            <p>We are not liable for:</p>
+            <ul>
+                <li>Any data loss, interruption, or errors.</li>
+                <li>Financial or tax decisions made using our tools.</li>
+            </ul>
+            <p>Our total liability is limited to the amount you paid to BudsiDesk in the 12 months preceding the claim.</p>
+        </section>
+
+        <section>
+            <h2>Changes to These Terms</h2>
+            <p>We may update these Terms from time to time. If changes are significant, we'll notify you via email or in-app notice.</p>
+        </section>
+
+        <section>
+            <h2>Contact Us</h2>
+            <p>For questions about these Terms or your account:<br>
+            <a href="mailto:admin@budsidesk.com">admin@budsidesk.com</a></p>
+        </section>
+    </div>
+</div>
+{% endblock %}

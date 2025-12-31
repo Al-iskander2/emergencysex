@@ -1,0 +1,573 @@
+{% extends "budsidesk_app/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statement of Work (SOW) Editor</title>
+    <style>
+        .sow-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(75, 73, 172, 0.1);
+            border: 1px solid #f0f2ff;
+        }
+        
+        .editor-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #98BDFF;
+        }
+        
+        .editor-header h1 {
+            color: #4B49AC;
+            margin: 0;
+            font-size: 1.75rem;
+        }
+        
+        .editor-header p {
+            color: #7DA0FA;
+            margin: 10px 0 0;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #f0f2ff;
+            box-shadow: 0 2px 6px rgba(75, 73, 172, 0.05);
+        }
+        
+        .section-card:hover {
+            border-color: #98BDFF;
+            box-shadow: 0 4px 10px rgba(75, 73, 172, 0.1);
+        }
+        
+        .section-title {
+            color: #4B49AC;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #98BDFF;
+            padding-bottom: 8px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .form-group-full {
+            width: 100%;
+        }
+        
+        .field-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #4B49AC;
+            font-size: 0.9rem;
+        }
+        
+        .required-field::after {
+            content: " *";
+            color: #FF6B6B;
+        }
+        
+        .help-text {
+            font-size: 0.8rem;
+            color: #7DA0FA;
+            margin-top: 4px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #98BDFF;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            background: #f8f9ff;
+            color: #4B49AC;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4B49AC;
+            box-shadow: 0 0 0 2px rgba(75, 73, 172, 0.2);
+            background: white;
+        }
+        
+        textarea.form-control {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .date-field, .number-field {
+            width: auto;
+            min-width: 150px;
+        }
+        
+        .form-actions {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9ff, #f0f2ff);
+            border-radius: 8px;
+            border: 1px solid #f0f2ff;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #4B49AC;
+            color: white;
+            border: 2px solid #4B49AC;
+        }
+        
+        .btn-primary:hover {
+            background: #7978E9;
+            border-color: #7978E9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(75, 73, 172, 0.3);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #4B49AC;
+            border: 2px solid #4B49AC;
+        }
+        
+        .btn-secondary:hover {
+            background: #f8f9ff;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background: white;
+            color: #4B49AC;
+            border: 1px solid #98BDFF;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-outline:hover {
+            background: #f8f9ff;
+            border-color: #4B49AC;
+        }
+        
+        .btn-danger {
+            background: #FF6B6B;
+            color: white;
+            border: 1px solid #FF6B6B;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+        
+        .btn-danger:hover {
+            background: #FF5252;
+            border-color: #FF5252;
+        }
+        
+        .dynamic-item {
+            background: #f8f9ff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border-left: 4px solid #4B49AC;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .input-group .form-control {
+            flex: 1;
+        }
+        
+        .milestone-item {
+            background: #f8f9ff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border-left: 4px solid #4B49AC;
+        }
+        
+        .milestone-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .milestone-field {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .milestone-actions {
+            display: flex;
+            align-items: flex-end;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .milestone-row {
+                flex-direction: column;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sow-container">
+        <div class="editor-header">
+            <h1>Statement of Work (SOW) Editor</h1>
+            <p>Create and customize your Statement of Work</p>
+        </div>
+        
+        <form id="sowForm" method="POST" action="{% url 'statement_of_work_form' %}">
+            {% csrf_token %}
+            
+            <!-- Basic Information -->
+            <div class="section-card">
+                <h3 class="section-title">Basic Information</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="field-label required-field">Project Name</label>
+                        <input type="text" class="form-control" id="project_name" name="project_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="field-label">Date</label>
+                        <input type="date" class="form-control date-field" id="today" name="today" value="{{ today }}">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Client Information -->
+            <div class="section-card">
+                <h3 class="section-title">Client Information</h3>
+                <div class="form-group-full">
+                    <label class="field-label required-field">Client Name / Company</label>
+                    <input type="text" class="form-control" id="client_name" name="client_name" required>
+                </div>
+                <div class="form-group-full">
+                    <label class="field-label required-field">Address / Contact Information</label>
+                    <textarea class="form-control" id="client_contact" name="client_contact" rows="3" required></textarea>
+                </div>
+            </div>
+            
+            <!-- Provider Information -->
+            <div class="section-card">
+                <h3 class="section-title">Provider Information</h3>
+                <div class="form-group-full">
+                    <label class="field-label required-field">Provider Name / Company</label>
+                    <input type="text" class="form-control" id="provider_name" name="provider_name" required>
+                </div>
+                <div class="form-group-full">
+                    <label class="field-label required-field">Address / Contact Information</label>
+                    <textarea class="form-control" id="provider_contact" name="provider_contact" rows="3" required></textarea>
+                </div>
+            </div>
+            
+            <!-- Project Description -->
+            <div class="section-card">
+                <h3 class="section-title">Project Description</h3>
+                <div class="form-group-full">
+                    <label class="field-label required-field">Project Overview and Objectives</label>
+                    <textarea class="form-control" id="project_overview" name="project_overview" rows="4" required></textarea>
+                </div>
+                
+                <!-- Tasks -->
+                <div class="form-group-full">
+                    <label class="field-label">Project Tasks</label>
+                    <div id="tasks-container">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="tasks[]" placeholder="Task description">
+                            <button type="button" class="btn btn-danger remove-task">Remove</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline" id="add-task">
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                </div>
+                
+                <!-- Out of Scope -->
+                <div class="form-group-full">
+                    <label class="field-label">Services NOT Included</label>
+                    <div id="out-of-scope-container">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="out_of_scope[]" placeholder="Service not included">
+                            <button type="button" class="btn btn-danger remove-out-of-scope">Remove</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline" id="add-out-of-scope">
+                        <i class="fas fa-plus"></i> Add Item
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Project Milestones -->
+            <div class="section-card">
+                <h3 class="section-title">Project Milestones</h3>
+                <div id="milestones-container">
+                    <div class="milestone-item">
+                        <div class="milestone-row">
+                            <div class="milestone-field">
+                                <label class="field-label">Milestone Name</label>
+                                <input type="text" class="form-control" name="milestone_name[]" required>
+                            </div>
+                            <div class="milestone-field">
+                                <label class="field-label">Deliverable</label>
+                                <input type="text" class="form-control" name="milestone_deliverable[]" required>
+                            </div>
+                            <div class="milestone-field">
+                                <label class="field-label">Deadline</label>
+                                <input type="date" class="form-control" name="milestone_deadline[]" required>
+                            </div>
+                            <div class="milestone-actions">
+                                <button type="button" class="btn btn-danger remove-milestone">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline" id="add-milestone">
+                    <i class="fas fa-plus"></i> Add Milestone
+                </button>
+            </div>
+            
+            <!-- Payment Terms -->
+            <div class="section-card">
+                <h3 class="section-title">Payment Terms</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="field-label required-field">Total Project Cost</label>
+                        <input type="text" class="form-control" id="total_cost" name="total_cost" placeholder="€15,000.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="field-label required-field">Preferred Payment Method</label>
+                        <input type="text" class="form-control" id="payment_method" name="payment_method" placeholder="Bank Transfer / PayPal / Stripe" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="field-label required-field">Included Revisions</label>
+                        <input type="text" class="form-control" id="included_revisions" name="included_revisions" placeholder="2 rounds" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="field-label required-field">Rate for Additional Revisions</label>
+                        <input type="text" class="form-control" id="revision_rate" name="revision_rate" placeholder="€75 per hour" required>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Termination Terms -->
+            <div class="section-card">
+                <h3 class="section-title">Termination Terms</h3>
+                <div class="form-group">
+                    <label class="field-label required-field">Termination Notice Days</label>
+                    <input type="number" class="form-control number-field" id="notice_days" name="notice_days" value="14" required>
+                </div>
+            </div>
+            
+            <!-- Generation Options -->
+            <div class="section-card">
+                <h3 class="section-title">Generation Options</h3>
+                <div class="form-group">
+                    <label class="field-label">Generation Method</label>
+                    <select class="form-control" id="mode" name="mode">
+                        <option value="tokens" selected>Simple Token Replacement</option>
+                        <option value="docxtpl">Advanced Template (docxtpl)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <div style="display: flex; justify-content: center; gap: 15px;">
+                    
+                    <button type="submit" class="btn btn-primary">Send by Email</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add task
+            document.getElementById('add-task').addEventListener('click', function() {
+                const container = document.getElementById('tasks-container');
+                const newTask = document.createElement('div');
+                newTask.className = 'input-group';
+                newTask.innerHTML = `
+                    <input type="text" class="form-control" name="tasks[]" placeholder="Task description">
+                    <button type="button" class="btn btn-danger remove-task">Remove</button>
+                `;
+                container.appendChild(newTask);
+                
+                // Add event listener to new remove button
+                const removeBtn = newTask.querySelector('.remove-task');
+                removeBtn.addEventListener('click', function() {
+                    removeTask(this);
+                });
+            });
+            
+            // Remove task
+            function removeTask(button) {
+                const taskGroup = button.closest('.input-group');
+                // Don't remove if it's the only task
+                if (document.querySelectorAll('#tasks-container .input-group').length > 1) {
+                    taskGroup.remove();
+                } else {
+                    alert('There must be at least one task.');
+                }
+            }
+            
+            // Add event listeners to existing remove buttons
+            document.querySelectorAll('.remove-task').forEach(button => {
+                button.addEventListener('click', function() {
+                    removeTask(this);
+                });
+            });
+            
+            // Add out of scope item
+            document.getElementById('add-out-of-scope').addEventListener('click', function() {
+                const container = document.getElementById('out-of-scope-container');
+                const newItem = document.createElement('div');
+                newItem.className = 'input-group';
+                newItem.innerHTML = `
+                    <input type="text" class="form-control" name="out_of_scope[]" placeholder="Service not included">
+                    <button type="button" class="btn btn-danger remove-out-of-scope">Remove</button>
+                `;
+                container.appendChild(newItem);
+                
+                // Add event listener to new remove button
+                const removeBtn = newItem.querySelector('.remove-out-of-scope');
+                removeBtn.addEventListener('click', function() {
+                    removeOutOfScope(this);
+                });
+            });
+            
+            // Remove out of scope item
+            function removeOutOfScope(button) {
+                const itemGroup = button.closest('.input-group');
+                // Don't remove if it's the only item
+                if (document.querySelectorAll('#out-of-scope-container .input-group').length > 1) {
+                    itemGroup.remove();
+                } else {
+                    alert('There must be at least one out of scope item.');
+                }
+            }
+            
+            // Add event listeners to existing remove buttons
+            document.querySelectorAll('.remove-out-of-scope').forEach(button => {
+                button.addEventListener('click', function() {
+                    removeOutOfScope(this);
+                });
+            });
+            
+            // Add milestone
+            document.getElementById('add-milestone').addEventListener('click', function() {
+                const container = document.getElementById('milestones-container');
+                const newMilestone = document.createElement('div');
+                newMilestone.className = 'milestone-item';
+                newMilestone.innerHTML = `
+                    <div class="milestone-row">
+                        <div class="milestone-field">
+                            <label class="field-label">Milestone Name</label>
+                            <input type="text" class="form-control" name="milestone_name[]" required>
+                        </div>
+                        <div class="milestone-field">
+                            <label class="field-label">Deliverable</label>
+                            <input type="text" class="form-control" name="milestone_deliverable[]" required>
+                        </div>
+                        <div class="milestone-field">
+                            <label class="field-label">Deadline</label>
+                            <input type="date" class="form-control" name="milestone_deadline[]" required>
+                        </div>
+                        <div class="milestone-actions">
+                            <button type="button" class="btn btn-danger remove-milestone">Remove</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(newMilestone);
+                
+                // Add event listener to new remove button
+                const removeBtn = newMilestone.querySelector('.remove-milestone');
+                removeBtn.addEventListener('click', function() {
+                    removeMilestone(this);
+                });
+            });
+            
+            // Remove milestone
+            function removeMilestone(button) {
+                const milestoneItem = button.closest('.milestone-item');
+                // Don't remove if it's the only milestone
+                if (document.querySelectorAll('.milestone-item').length > 1) {
+                    milestoneItem.remove();
+                } else {
+                    alert('There must be at least one milestone.');
+                }
+            }
+            
+            // Add event listeners to existing remove buttons
+            document.querySelectorAll('.remove-milestone').forEach(button => {
+                button.addEventListener('click', function() {
+                    removeMilestone(this);
+                });
+            });
+            
+            // Set default date for all date fields
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                if (!input.value) {
+                    input.value = today;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+{% endblock %}

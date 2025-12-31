@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EmergencySex</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF3B30; /* Vibrant Red */
+            --dark: #000000;
+            --gray: #1C1C1E;
+            --text: #FFFFFF;
+            --glass: rgba(28, 28, 30, 0.8);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--dark);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            background: var(--dark);
+            transition: opacity 0.3s ease;
+        }
+        
+        .screen.active { display: flex; z-index: 10; }
+        
+        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 10px; text-align: center; }
+        p { font-size: 1rem; color: #888; text-align: center; margin-bottom: 20px; }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            margin-top: auto;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4);
+        }
+        
+        .btn:active { transform: scale(0.98); }
+        .btn.secondary { background: var(--gray); color: #fff; box-shadow: none; margin-top: 10px; }
+        
+        /* Upload Screen */
+        .upload-area {
+            flex: 1;
+            border: 2px dashed #333;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-area img {
+            position: absolute; width: 100%; height: 100%; object-fit: cover;
+        }
+        
+        /* Form Controls */
+        .form-group { margin-bottom: 20px; width: 100%; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: #ccc; }
+        
+        .options { display: flex; gap: 10px; }
+        .option {
+            flex: 1;
+            background: var(--gray);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .option.selected {
+            border-color: var(--primary);
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--primary);
+        }
+        
+        input[type="range"] { width: 100%; accent-color: var(--primary); }
+        
+        /* Swipe Cards */
+        .card-stack {
+            flex: 1;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--gray);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card img { width: 100%; height: 100%; object-fit: cover; }
+        .card-info {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            padding: 20px;
+        }
+        
+        .actions {
+            display: flex; gap: 20px; justify-content: center; margin-bottom: 20px;
+        }
+        .action-btn {
+            width: 60px; height: 60px; border-radius: 50%;
+            border: none; font-size: 24px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .pass { background: #333; color: #fff; }
+        .like { background: var(--primary); color: #fff; }
+        
+        /* Match Screen */
+        .match-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .match-overlay.active { display: flex; }
+        
+        .match-avatars { display: flex; gap: 20px; margin: 40px 0; }
+        .avatar { width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 3px solid var(--primary); }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .status-pill {
+            background: #333; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; margin-top: 10px;
+        }
+        .status-pill.confirmed { background: #4CD964; color: #000; }
+        
+        /* Loading */
+        .loader {
+            border: 4px solid #333; border-top: 4px solid var(--primary);
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <!-- SCREEN 1: UPLOAD -->
+    <div id="screen-upload" class="screen active">
+        <h1>Drop your picture</h1>
+        <p>No account needed. Just you.</p>
+        
+        <div class="upload-area" onclick="document.getElementById('photo-input').click()">
+            <img id="preview-img" style="display:none;">
+            <span id="upload-text">+ Tap to Upload</span>
+        </div>
+        <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handleFile(this)">
+        
+        <button class="btn" onclick="goToPrefs()" disabled id="btn-next-1">Next</button>
+    </div>
+
+    <!-- SCREEN 2: PREFERENCES -->
+    <div id="screen-prefs" class="screen">
+        <h1>Who are you?</h1>
+        
+        <div class="form-group">
+            <label>You are</label>
+            <div class="options">
+                <div class="option" onclick="selectOption('gender', 'man', this)">Man</div>
+                <div class="option" onclick="selectOption('gender', 'female', this)">Female</div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Looking for</label>
+            <div class="options">
+                <div class="option" onclick="selectOption('looking', 'man', this)">Man</div>
+                <div class="option" onclick="selectOption('looking', 'female', this)">Female</div>
+                <div class="option" onclick="selectOption('looking', 'trans', this)">Trans</div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Role</label>
+            <div class="options">
+                <div class="option" onclick="selectOption('role', 'host', this)">Host</div>
+                <div class="option" onclick="selectOption('role', 'travel', this)">Travel</div>
+                <div class="option" onclick="selectOption('role', 'either', this)">Either</div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Radius: <span id="radius-val">10</span> km</label>
+            <input type="range" min="0" max="50" value="10" oninput="document.getElementById('radius-val').innerText = this.value; prefs.radius = this.value">
+        </div>
+        
+        <button class="btn" onclick="startSearch()">Search</button>
+    </div>
+
+    <!-- SCREEN 3: SWIPE -->
+    <div id="screen-swipe" class="screen">
+        <h1>Nearby</h1>
+        <div class="card-stack" id="card-stack">
+            <!-- Cards injected here -->
+            <div class="loader"></div>
+        </div>
+        
+        <div class="actions">
+            <button class="action-btn pass" onclick="swipe('left')">✕</button>
+            <button class="action-btn like" onclick="swipe('right')">♥</button>
+        </div>
+    </div>
+
+    <!-- MATCH OVERLAY -->
+    <div id="match-overlay" class="match-overlay">
+        <h1>It's a Match!</h1>
+        <p>Confirm to reveal location.</p>
+        
+        <div class="match-avatars">
+            <div class="avatar"><img id="my-avatar" src=""></div>
+            <div class="avatar"><img id="their-avatar" src=""></div>
+        </div>
+        
+        <div id="status-container">
+            <div class="status-pill" id="my-status">Waiting for you...</div>
+            <div class="status-pill" id="their-status">Waiting for them...</div>
+        </div>
+        
+        <button class="btn" onclick="confirmMatch()" id="btn-confirm">CONFIRM</button>
+        <button class="btn secondary" onclick="cancelMatch()">CANCEL</button>
+        
+        <div id="location-reveal" style="display:none; margin-top: 20px; width: 100%;">
+            <a id="maps-link" href="#" target="_blank" class="btn" style="background: #4CD964; color: #000;">OPEN IN MAPS</a>
+        </div>
+    </div>
+
+    <script>
+        // STATE
+        let session_id = localStorage.getItem('session_id');
+        let prefs = { gender: '', looking: '', role: '', radius: 10 };
+        let currentCandidates = [];
+        let currentCardIndex = 0;
+        let matchId = null;
+        let pollInterval = null;
+
+        // INIT
+        async function init() {
+            const headers = session_id ? { 'X-Session-ID': session_id } : {};
+            const res = await fetch('/api/mvp/init/', { method: 'POST', headers });
+            const data = await res.json();
+            session_id = data.session_id;
+            localStorage.setItem('session_id', session_id);
+            
+            if (data.has_photo) {
+                // If already has photo, maybe skip to prefs or search?
+                // For MVP simplicity, let them re-upload or just show next
+                document.getElementById('upload-text').innerText = "Photo Uploaded";
+                document.getElementById('btn-next-1').disabled = false;
+            }
+        }
+        init();
+
+        // UPLOAD
+        function handleFile(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview-img').src = e.target.result;
+                    document.getElementById('preview-img').style.display = 'block';
+                    document.getElementById('upload-text').style.display = 'none';
+                    document.getElementById('btn-next-1').disabled = false;
+                    
+                    // Set my avatar for match screen
+                    document.getElementById('my-avatar').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function goToPrefs() {
+            // Upload photo first
+            const input = document.getElementById('photo-input');
+            if (input.files[0]) {
+                const formData = new FormData();
+                formData.append('photo', input.files[0]);
+                await fetch('/api/mvp/profile/', {
+                    method: 'POST',
+                    headers: { 'X-Session-ID': session_id },
+                    body: formData
+                });
+            }
+            
+            document.getElementById('screen-upload').classList.remove('active');
+            document.getElementById('screen-prefs').classList.add('active');
+        }
+
+        // PREFS
+        function selectOption(key, val, el) {
+            prefs[key] = val;
+            // UI update
+            el.parentElement.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        async function startSearch() {
+            // Save prefs
+            const formData = new FormData();
+            formData.append('gender', prefs.gender);
+            formData.append('looking_for', prefs.looking);
+            formData.append('role', prefs.role);
+            formData.append('radius', prefs.radius);
+            
+            await fetch('/api/mvp/profile/', {
+                method: 'POST',
+                headers: { 'X-Session-ID': session_id },
+                body: formData
+            });
+
+            document.getElementById('screen-prefs').classList.remove('active');
+            document.getElementById('screen-swipe').classList.add('active');
+            
+            loadCandidates();
+        }
+
+        // SWIPE
+        async function loadCandidates() {
+            const res = await fetch('/api/mvp/search/', { headers: { 'X-Session-ID': session_id } });
+            const data = await res.json();
+            currentCandidates = data.candidates || [];
+            currentCardIndex = 0;
+            renderCard();
+            
+            // Start polling for matches in background
+            if (!pollInterval) pollInterval = setInterval(pollMatch, 3000);
+        }
+
+        function renderCard() {
+            const stack = document.getElementById('card-stack');
+            stack.innerHTML = '';
+            
+            if (currentCardIndex >= currentCandidates.length) {
+                stack.innerHTML = '<div class="loader"></div><p>Searching for more...</p>';
+                setTimeout(loadCandidates, 5000);
+                return;
+            }
+            
+            const c = currentCandidates[currentCardIndex];
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <img src="${c.photo_url}">
+                <div class="card-info">
+                    <h2>${c.gender}, ${c.role}</h2>
+                    <p>${c.distance} away</p>
+                </div>
+            `;
+            stack.appendChild(card);
+        }
+
+        async function swipe(dir) {
+            const c = currentCandidates[currentCardIndex];
+            if (!c) return;
+            
+            if (dir === 'right') {
+                const res = await fetch('/api/mvp/like/', {
+                    method: 'POST',
+                    headers: { 'X-Session-ID': session_id },
+                    body: JSON.stringify({ target_id: c.id })
+                });
+                const data = await res.json();
+                if (data.match) {
+                    showMatch(data.match_id, c);
+                }
+            }
+            
+            currentCardIndex++;
+            renderCard();
+        }
+
+        // MATCH & POLLING
+        async function pollMatch() {
+            const res = await fetch('/api/mvp/poll/', { headers: { 'X-Session-ID': session_id } });
+            const data = await res.json();
+            
+            if (data.match_found) {
+                matchId = data.match_id;
+                document.getElementById('match-overlay').classList.add('active');
+                
+                // Update UI
+                document.getElementById('their-avatar').src = data.other_user.photo_url;
+                
+                if (data.i_confirmed) {
+                    document.getElementById('my-status').innerText = "Confirmed";
+                    document.getElementById('my-status').classList.add('confirmed');
+                    document.getElementById('btn-confirm').style.display = 'none';
+                }
+                
+                if (data.they_confirmed) {
+                    document.getElementById('their-status').innerText = "Confirmed";
+                    document.getElementById('their-status').classList.add('confirmed');
+                }
+                
+                if (data.status === 'confirmed' && data.location) {
+                    document.getElementById('location-reveal').style.display = 'block';
+                    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${data.location.lat},${data.location.lon}`;
+                    document.getElementById('maps-link').href = mapsUrl;
+                }
+            }
+        }
+
+        function showMatch(id, user) {
+            matchId = id;
+            document.getElementById('match-overlay').classList.add('active');
+            document.getElementById('their-avatar').src = user.photo_url;
+        }
+
+        async function confirmMatch() {
+            await fetch('/api/mvp/confirm/', {
+                method: 'POST',
+                headers: { 'X-Session-ID': session_id },
+                body: JSON.stringify({ match_id: matchId })
+            });
+            document.getElementById('my-status').innerText = "Confirmed";
+            document.getElementById('my-status').classList.add('confirmed');
+            document.getElementById('btn-confirm').style.display = 'none';
+        }
+
+        async function cancelMatch() {
+            await fetch('/api/mvp/cancel/', {
+                method: 'POST',
+                headers: { 'X-Session-ID': session_id },
+                body: JSON.stringify({ match_id: matchId })
+            });
+            document.getElementById('match-overlay').classList.remove('active');
+            matchId = null;
+        }
+
+    </script>
+</body>
+</html>

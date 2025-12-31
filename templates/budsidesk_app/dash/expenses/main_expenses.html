@@ -1,0 +1,473 @@
+{% extends 'budsidesk_app/base.html' %}
+{% load static %}
+{% load plan_tags %}  <!-- Cargar tags de plan -->
+
+{% block title %}Expenses{% endblock %}
+{% block content %}
+
+<div style="width: 100%; padding: 2rem; box-sizing: border-box;">
+  <div style="display: flex; flex-wrap: wrap; margin-bottom: 2rem;">
+    <!-- Header Section -->
+    <div style="width: 100%; margin-bottom: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1 style="margin: 0; font-size: 1.75rem; color: #4B49AC;">Expenses Hub</h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensajes de Django -->
+  {% if messages %}
+    {% for message in messages %}
+      <div style="padding: 12px; margin-bottom: 1rem; border-radius: 8px; 
+                  {% if message.tags == 'success' %}background: #e8f5e8; color: #2d5016; border: 1px solid #4B49AC;
+                  {% else %}background: #ffe6e6; color: #8b0000; border: 1px solid #ff7DA0FA;{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+    <!-- Left Column - Upload Expense -->
+    <div style="flex: 1 1 30%; min-width: 280px;">
+      <div style="background: white; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(75, 73, 172, 0.1); height: 100%; border: 1px solid #f0f2ff;">
+        <div style="text-align: center; padding: 2rem;">
+          <div style="background: linear-gradient(135deg, #4B49AC, #7DA0FA); color: white; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+            <i class="fas fa-receipt" style="font-size: 2rem;"></i>
+          </div>
+          <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: #4B49AC;">Upload Expense</h3>
+          <p style="color: #6c757d;">JPG or PDF. Automatic OCR processing for purchases.</p>
+          
+          <!-- Formulario de subida -->
+          <form id="upload-form" method="post" action="{% url 'expense_upload' %}" enctype="multipart/form-data" style="margin-top: 1rem;">
+            {% csrf_token %}
+            <div id="dropzone" style="border: 2px dashed #98BDFF; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.3s ease;">
+              <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #4B49AC; margin-bottom: 0.5rem;"></i>
+              <div style="font-weight: 500; color: #4B49AC;">Drag & drop file</div>
+              <p style="color: #7DA0FA; font-size: 0.875rem; margin: 0.25rem 0;">or click to choose</p>
+              <input id="file" type="file" name="file" accept="image/*,application/pdf" required style="display: none;"/>
+              <div id="file-chip" class="file-chip" style="display: none; background: rgba(75, 73, 172, 0.1); color: #4B49AC; padding: 0.5rem 1rem; border-radius: 20px; margin-top: 0.5rem; font-size: 0.875rem;">
+                <span id="file-name"></span>
+              </div>
+            </div>
+            
+            <button type="submit" class="btn-improved" style="background: linear-gradient(135deg, #4B49AC, #7DA0FA); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; width: 100%; justify-content: center; font-weight: 600; transition: all 0.3s ease;">
+              <i class="fas fa-bolt"></i>Process with OCR
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Column - Expense Breakdown -->
+    <div style="flex: 1 1 30%; min-width: 280px;">
+      <div style="background: white; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(75, 73, 172, 0.1); height: 100%; border: 1px solid #f0f2ff;">
+        <div style="padding: 1.25rem; border-bottom: 1px solid #f0f2ff; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #f8f9ff, #f0f2ff);">
+          <h5 style="margin: 0; color: #4B49AC; font-weight: 700;">Expense Summary</h5>
+          <i class="fas fa-chart-pie" style="color: #4B49AC;"></i>
+        </div>
+        <div style="padding: 1rem;">
+          <div style="max-height: 350px; overflow-y: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #f0f2ff; color: #4B49AC; font-weight: 600;">Metric</th>
+                  <th style="padding: 0.75rem; text-align: right; border-bottom: 1px solid #f0f2ff; color: #4B49AC; font-weight: 600;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding: 0.75rem; border-bottom: 1px solid #f0f2ff; color: #495057;">Total Expenses</td>
+                  <td style="padding: 0.75rem; border-bottom: 1px solid #f0f2ff; text-align: right; color: #4B49AC; font-weight: 600;">
+                    €{{ total_expenses|default:"0.00" }}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.75rem; border-bottom: 1px solid #f0f2ff; color: #495057;">VAT Recoverable</td>
+                  <td style="padding: 0.75rem; border-bottom: 1px solid #f0f2ff; text-align: right;  color: #7DA0FA;">
+                    €{{ total_vat|default:"0.00" }}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.75rem; border-bottom: 1px solid #f0f2ff; color: #495057;">Net Amount</td>
+                  <td style="padding: 0.75rem; border-bottom: 1px solid #f0f2ff; text-align: right;  #4B49AC;">
+                    €{{ total_net|default:"0.00" }}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.75rem; border-bottom: 1px solid #f0f2ff; color: #495057;">This Month</td>
+                  <td style="padding: 0.75rem; border-bottom: 1px solid #f0f2ff; text-align: right;  #7DA0FA;">
+                    €{{ month_expenses|default:"0.00" }}
+                  </td>
+                </tr>
+                <tr style="font-weight: 700;">
+                  <td style="padding: 0.75rem; color: #4B49AC;">Avg per Expense</td>
+                  <td style="padding: 0.75rem; text-align: right;  color: #4B49AC;">
+                    €{{ avg_expense|default:"0.00" }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column - Expense List -->
+    <div style="flex: 1 1 30%; min-width: 280px;">
+      <div style="background: white; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(75, 73, 172, 0.1); height: 100%; border: 1px solid #f0f2ff;">
+        <div style="padding: 1.25rem; border-bottom: 1px solid #f0f2ff; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #f8f9ff, #f0f2ff);">
+          <h5 style="margin: 0; color: #4B49AC; font-weight: 700;">Recent Expenses</h5>
+          <i class="fas fa-list-alt" style="color: #4B49AC;"></i>
+        </div>
+        <div style="padding: 1rem;">
+          <input type="text" id="expenseSearch" placeholder="Search expenses..." style="width: 100%; padding: 0.75rem; border: 1px solid #98BDFF; border-radius: 8px; margin-bottom: 1rem; background: #f8f9ff; color: #4B49AC;">
+        </div>
+        <div style="padding: 0 1rem 1rem; max-height: 350px; overflow-y: auto;">
+          {% for expense in expenses %}
+          <div class="expense-item" style="padding: 1rem; border: 1px solid #f0f2ff; border-radius: 12px; margin-bottom: 0.75rem; background: linear-gradient(135deg, #f8f9ff, #ffffff); transition: all 0.3s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+              <div style="flex-grow: 1;">
+                <div style="font-weight: 700; color: #4B49AC; margin-bottom: 0.25rem;">{{ expense.contact.name }}</div>
+                <div style="font-size: 0.875rem; color: #7DA0FA;">
+                  {{ expense.date|date:"M d, Y" }} • {{ expense.invoice_number }}
+                </div>
+                {% if expense.description %}
+                <div style="font-size: 0.8rem; color: #98BDFF; margin-top: 0.25rem;">
+                  {{ expense.description|truncatewords:8 }}
+                </div>
+                {% endif %}
+              </div>
+              <div style="text-align: right;">
+                <div style="font-weight: 700; font-size: 1.1rem; color: #4B49AC; ">
+                  €{{ expense.total|floatformat:2 }}
+                </div>
+                <div style="font-size: 0.75rem; color: #7DA0FA;">
+                  VAT: €{{ expense.vat_amount|floatformat:2 }}
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+              <a href="{% url 'expense_view' expense.id %}" class="action-btn" title="View Details">
+                <i class="fas fa-eye"></i>
+              </a>
+              <form method="post" action="{% url 'expense_delete' expense.id %}" style="display: inline;" 
+                    onsubmit="return confirm('¿Estás seguro de que quieres eliminar este gasto?');">
+                {% csrf_token %}
+                <button type="submit" class="action-btn delete-btn" title="Delete Expense">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+              {% if expense.original_file %}
+              <a href="{{ expense.original_file.url }}" class="action-btn" title="Download Original" target="_blank">
+                <i class="fas fa-download"></i>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+          {% empty %}
+          <div style="text-align: center; padding: 2rem; color: #98BDFF;">
+            <i class="fas fa-receipt" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+            <p style="color: #7DA0FA;">No expenses found. Upload your first expense receipt!</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expense Categories Guide - SOLO SMART/ELITE -->
+  {% if user|feature_available:'expense_categories' %}
+    <div style="margin-top: 2rem;">
+      <div style="background: white; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(75, 73, 172, 0.1); border: 1px solid #f0f2ff;">
+        <div style="padding: 1.25rem; border-bottom: 1px solid #f0f2ff; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #f8f9ff, #f0f2ff);">
+          <h5 style="margin: 0; color: #4B49AC; font-weight: 700;">Expense Categories Guide</h5>
+          <i class="fas fa-book" style="color: #4B49AC;"></i>
+        </div>
+        <div style="padding: 1.5rem;">
+          <p style="color: #7DA0FA; margin-bottom: 1rem;">
+            Use these categories to classify your business expenses for better tracking and tax purposes.
+          </p>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+              <thead>
+                <tr style="background: linear-gradient(135deg, #f8f9ff, #f0f2ff);">
+                  <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #98BDFF; color: #4B49AC; font-weight: 700; width: 15%;">Category</th>
+                  <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #98BDFF; color: #4B49AC; font-weight: 700;">Included Services & Items</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; font-weight: 600; color: #4B49AC;">Office</td>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; color: #7DA0FA;">
+                    Co-working spaces, Utilities (electricity, water, gas), Internet service, Office furniture, Office supplies
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; font-weight: 600; color: #4B49AC;">Equipment</td>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; color: #7DA0FA;">
+                    Laptops, Computers, Smartphones, Software licenses, Office equipment & accessories
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; font-weight: 600; color: #4B49AC;">Travel</td>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; color: #7DA0FA;">
+                    Public transit, Fuel, Taxi fares, Parking fees, Business accommodations, Business meals
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; font-weight: 600; color: #4B49AC;">Marketing</td>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; color: #7DA0FA;">
+                    Website hosting, Domain registration, Social media ads, Google/Facebook ads, Branding design
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; font-weight: 600; color: #4B49AC;">Development</td>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; color: #7DA0FA;">
+                    Online courses, Tutorials, Industry conferences, Workshops, Certification fees
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; font-weight: 600; color: #4B49AC;">Communication</td>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; color: #7DA0FA;">
+                    Business phone plans, Skype subscriptions, Zoom subscriptions, Communication tools
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; font-weight: 600; color: #4B49AC;">Financial</td>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; color: #7DA0FA;">
+                    Accounting software, Bookkeeping software, Professional services, Legal fees
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; font-weight: 600; color: #4B49AC;">Payment Fees</td>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; color: #7DA0FA;">
+                    PayPal fees, Stripe fees, Square fees, Platform commissions (Upwork, Fiverr)
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; font-weight: 600; color: #4B49AC;">Insurance</td>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; color: #7DA0FA;">
+                    Health insurance, Business liability, Equipment insurance, Gadget insurance
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; font-weight: 600; color: #4B49AC;">Miscellaneous</td>
+                  <td style="padding: 1rem; border-bottom: 1px solid #f0f2ff; color: #7DA0FA;">
+                    Bank account fees, Miscellaneous supplies, Unexpected business expenses
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top: 1rem; padding: 1rem; background: linear-gradient(135deg, #f8f9ff, #f0f2ff); border-radius: 12px; border-left: 4px solid #4B49AC;">
+            <p style="margin: 0; font-size: 0.875rem; color: #4B49AC;">
+              <strong>Tip:</strong> Choose the most appropriate category when uploading expenses to maintain organized financial records.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <!-- Para Lite: Mostrar mensaje de upgrade -->
+    <div style="margin-top: 2rem;">
+      <div style="background: white; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(75, 73, 172, 0.1); border: 1px solid #f0f2ff; text-align: center; padding: 2rem;">
+        <div style="opacity: 0.6;">
+          <i class="fas fa-book" style="font-size: 3rem; color: #6c757d; margin-bottom: 1rem;"></i>
+          <h5 style="color: #6c757d;">Expense Categories</h5>
+          <p style="color: #6c757d;">Advanced categorization available with Budsi Smart</p>
+          <a href="{% url 'pricing' %}" style="background: #4B49AC; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; display: inline-block;">
+            Upgrade to Unlock
+          </a>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f8f9ff;
+  border: 1px solid #98BDFF;
+  color: #4B49AC;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.action-btn:hover {
+  background: #4B49AC;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(75, 73, 172, 0.3);
+}
+
+.delete-btn {
+  background: #fff5f5 !important;
+  border: 1px solid #ff98BD !important;
+  color: #ff4B49 !important;
+}
+
+.delete-btn:hover {
+  background: #ff4B49 !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 75, 73, 0.3);
+}
+
+.expense-item {
+  transition: all 0.3s ease;
+}
+
+.expense-item:hover {
+  background: linear-gradient(135deg, #f0f2ff, #ffffff) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(75, 73, 172, 0.2);
+  border-color: #98BDFF !important;
+}
+
+.btn-improved:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(75, 73, 172, 0.3);
+}
+
+#dropzone:hover, #dropzone.drag {
+  border-color: #4B49AC;
+  background: rgba(75, 73, 172, 0.05);
+  box-shadow: 0 4px 12px rgba(75, 73, 172, 0.1);
+}
+
+.file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Mejoras para la nueva sección de categorías */
+.category-table tr:hover {
+  background: linear-gradient(135deg, #f8f9ff, #f0f2ff);
+}
+
+/* Estilo para el botón New Invoice en hover */
+a[href="{% url 'invoice_create' %}"]:hover {
+  background: linear-gradient(135deg, #4B49AC, #7DA0FA) !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(75, 73, 172, 0.3);
+}
+
+/* Estilos para la tarjeta de upgrade */
+.upgrade-card {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(75, 73, 172, 0.1);
+  border: 1px solid #f0f2ff;
+  text-align: center;
+  padding: 2rem;
+}
+
+.upgrade-card i {
+  font-size: 3rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.upgrade-card h5 {
+  color: #6c757d;
+}
+
+.upgrade-card p {
+  color: #6c757d;
+}
+
+.upgrade-card a {
+  background: #4B49AC;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+.upgrade-card a:hover {
+  background: #3a3899;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file');
+    const fileName = document.getElementById('file-name');
+    const fileChip = document.getElementById('file-chip');
+    const uploadForm = document.getElementById('upload-form');
+
+    // 1. Abrir file picker al hacer clic en el dropzone
+    dropzone.addEventListener('click', function(e) {
+        fileInput.click();
+    });
+
+    // 2. Mostrar nombre del archivo seleccionado
+    fileInput.addEventListener('change', function() {
+        if (fileInput.files && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            fileName.textContent = file.name;
+            fileChip.style.display = 'inline-flex';
+        }
+    });
+
+    // 3. Drag & drop functionality
+    ['dragenter', 'dragover'].forEach(evt => {
+        dropzone.addEventListener(evt, function(e) {
+            e.preventDefault();
+            dropzone.classList.add('drag');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(evt => {
+        dropzone.addEventListener(evt, function(e) {
+            e.preventDefault();
+            dropzone.classList.remove('drag');
+        });
+    });
+
+    dropzone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+            fileInput.files = files;
+            const file = files[0];
+            fileName.textContent = file.name;
+            fileChip.style.display = 'inline-flex';
+        }
+    });
+
+    // 4. Buscador de gastos
+    const expenseSearch = document.getElementById('expenseSearch');
+    if (expenseSearch) {
+        expenseSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const expenseItems = document.querySelectorAll('.expense-item');
+            expenseItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
+
+{% endblock %}
