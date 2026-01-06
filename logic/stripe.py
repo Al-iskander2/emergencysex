@@ -28,7 +28,7 @@ def process_payment_view(request):
 
 @login_required
 def pricing_view(request):
-    return render(request, "budsidesk_app/pricing.html")
+    return render(request, "emergency_app/pricing.html")
 
 @csrf_exempt
 @login_required
@@ -64,17 +64,17 @@ def create_payment_intent_view(request):
 def payment_page(request):
     plan_code = request.GET.get("plan", "smart_monthly")
     plan_map = {
-        "smart_monthly": {"name": "Budsi Smart", "amount": 1299, "interval": "month"},
-        "smart_yearly": {"name": "Budsi Smart", "amount": 12900, "interval": "year"},
-        "elite_monthly": {"name": "Budsi Elite", "amount": 1799, "interval": "month"},
-        "elite_yearly": {"name": "Budsi Elite", "amount": 17900, "interval": "year"},
+        "smart_monthly": {"name": "emerg Smart", "amount": 1299, "interval": "month"},
+        "smart_yearly": {"name": "emerg Smart", "amount": 12900, "interval": "year"},
+        "elite_monthly": {"name": "emerg Elite", "amount": 1799, "interval": "month"},
+        "elite_yearly": {"name": "emerg Elite", "amount": 17900, "interval": "year"},
     }
     plan_info = plan_map.get(plan_code)
 
     if not plan_info:
         return redirect("pricing")
 
-    return render(request, "budsidesk_app/payment.html", {
+    return render(request, "emergency_app/payment.html", {
         "plan_code": plan_code,
         "name": plan_info["name"],
         "amount": plan_info["amount"],

@@ -5,7 +5,7 @@ from django.db import IntegrityError
 from django.utils.text import slugify
 from django.db.models import Count, Sum, Q
 from datetime import datetime, timedelta
-from budsi_database.models import Contact, Invoice
+from emerg_database.models import Contact, Invoice
 
 def get_or_create_contact(*, user, name, is_supplier=False, is_client=True, email=None, tax_id=None):
     """Servicio unificado para crear/obtener contactos - VERSIÓN MEJORADA"""

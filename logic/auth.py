@@ -1,17 +1,17 @@
-# budsi_django/views/auth.py
+# emerg_django/views/auth.py
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 
-from budsi_django.forms import CustomUserCreationForm
-from budsi_database.models import FiscalProfile
+from emerg_django.forms import CustomUserCreationForm
+from emerg_database.models import FiscalProfile
 
 def intro_view(request):
     """✅ Vista de introducción - redirige a dashboard si ya está autenticado"""
     if request.user.is_authenticated:
         return redirect("dashboard")  
-    return render(request, "budsidesk_app/intro.html")
+    return render(request, "emergency_app/intro.html")
 
 def login_view(request):
     """✅ Vista de login"""
@@ -23,8 +23,8 @@ def login_view(request):
             login(request, user)
             return redirect("dashboard")
         else:
-            return render(request, "budsidesk_app/login.html", {"error": "Invalid email or password"})
-    return render(request, "budsidesk_app/login.html")
+            return render(request, "emergency_app/login.html", {"error": "Invalid email or password"})
+    return render(request, "emergency_app/login.html")
 
 def register_view(request):
     """✅ Vista de registro"""
@@ -32,12 +32,12 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            user.backend = 'budsi_django.backends.EmailBackend'
+            user.backend = 'emerg_django.backends.EmailBackend'
             login(request, user)
             return redirect('onboarding')
     else:
         form = CustomUserCreationForm()
-    return render(request, 'budsidesk_app/register.html', {'form': form})
+    return render(request, 'emergency_app/register.html', {'form': form})
 
 @login_required
 def onboarding_view(request):
@@ -70,9 +70,9 @@ def onboarding_view(request):
 
         except Exception as e:
             print(f"Error in onboarding: {e}")
-            return render(request, "budsidesk_app/onboard.html", {"error": str(e)})
+            return render(request, "emergency_app/onboard.html", {"error": str(e)})
 
-    return render(request, "budsidesk_app/onboard.html")
+    return render(request, "emergency_app/onboard.html")
 
 @login_required
 def account_settings_view(request):
@@ -100,7 +100,7 @@ def account_settings_view(request):
             
             # Puedes añadir más form_types aquí si necesitas...
         
-        return render(request, "budsidesk_app/account_settings.html", {
+        return render(request, "emergency_app/account_settings.html", {
             'profile': profile
         })
         

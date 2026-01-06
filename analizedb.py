@@ -1,4 +1,4 @@
-# analyze_budsi_tables.py
+# analyze_emerg_tables.py
 import os
 import django
 import sys
@@ -6,14 +6,14 @@ from django.db import connection
 from django.core.management.color import color_style
 
 # Configurar entorno Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "budsi_django.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "emerg_django.settings")
 django.setup()
 
 style = color_style()
 
-def list_budsi_tables():
-    """Lista todas las tablas budsi_database_* en formato similar a \dt"""
-    print(style.SUCCESS("📋 LISTADO DE TABLAS budsi_database_*"))
+def list_emerg_tables():
+    """Lista todas las tablas emerg_database_* en formato similar a \dt"""
+    print(style.SUCCESS("📋 LISTADO DE TABLAS emerg_database_*"))
     print("=" * 80)
     
     with connection.cursor() as cursor:
@@ -23,7 +23,7 @@ def list_budsi_tables():
                 table_type,
                 table_schema
             FROM information_schema.tables 
-            WHERE table_name LIKE 'budsi_database_%'
+            WHERE table_name LIKE 'emerg_database_%'
             AND table_schema = 'public'
             ORDER BY table_name;
         """)
@@ -178,16 +178,16 @@ def show_table_content(table_name, limit=3):
         if count > limit:
             print(f"     ... y {count - limit} más")
 
-def analyze_all_budsi_tables():
-    """Analiza todas las tablas budsi_database_*"""
-    print(style.SUCCESS("🚀 ANÁLISIS COMPLETO DE TABLAS budsi_database_*"))
+def analyze_all_emerg_tables():
+    """Analiza todas las tablas emerg_database_*"""
+    print(style.SUCCESS("🚀 ANÁLISIS COMPLETO DE TABLAS emerg_database_*"))
     print("=" * 80)
     
     # 1. Listar todas las tablas
-    budsi_tables = list_budsi_tables()
+    emerg_tables = list_emerg_tables()
     
     # 2. Analizar cada tabla en detalle
-    for table in budsi_tables:
+    for table in emerg_tables:
         show_table_structure(table)
         show_table_content(table)
         print("\n" + "=" * 80)
@@ -199,10 +199,10 @@ def check_data_relationships():
     
     # Verificar relaciones comunes
     relationships = [
-        ("budsi_database_invoice", "budsi_database_invoiceconcept", "invoice_id"),
-        ("budsi_database_user", "budsi_database_invoice", "user_id"),
-        ("budsi_database_user", "budsi_database_contact", "user_id"),
-        ("budsi_database_user", "budsi_database_project", "user_id"),
+        ("emerg_database_invoice", "emerg_database_invoiceconcept", "invoice_id"),
+        ("emerg_database_user", "emerg_database_invoice", "user_id"),
+        ("emerg_database_user", "emerg_database_contact", "user_id"),
+        ("emerg_database_user", "emerg_database_project", "user_id"),
     ]
     
     for table1, table2, key_field in relationships:
@@ -237,7 +237,7 @@ def main():
     """Función principal"""
     try:
         # 1. Análisis completo de tablas
-        analyze_all_budsi_tables()
+        analyze_all_emerg_tables()
         
         # 2. Verificar relaciones
         check_data_relationships()
@@ -247,14 +247,14 @@ def main():
         print("=" * 80)
         
         with connection.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name LIKE 'budsi_database_%';")
+            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name LIKE 'emerg_database_%';")
             table_count = cursor.fetchone()[0]
             
             total_records = 0
             cursor.execute("""
                 SELECT table_name 
                 FROM information_schema.tables 
-                WHERE table_name LIKE 'budsi_database_%';
+                WHERE table_name LIKE 'emerg_database_%';
             """)
             
             for table in cursor.fetchall():

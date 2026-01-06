@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.db import connection
 
 # Configurar entorno Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "budsi_django.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "emerg_django.settings")
 django.setup()
 
 User = get_user_model()
@@ -31,7 +31,7 @@ def verify_and_confirm():
     models_to_clean = ['Invoice', 'Contact', 'FiscalProfile', 'Project', 'InvoiceConcept', 'TaxPeriod', 'FiscalConfig']
     for model_name in models_to_clean:
         try:
-            model = apps.get_model('budsi_database', model_name)
+            model = apps.get_model('emerg_database', model_name)
             count = model.objects.count()
             print(f"   • {model_name}: {count} registros")
         except Exception as e:
@@ -54,13 +54,13 @@ def purge_with_sql():
     
     # ORDEN CORRECTO basado en dependencias
     tables = [
-        'budsi_database_invoiceconcept',  # Primero las líneas de factura
-        'budsi_database_invoice',         # Luego las facturas
-        'budsi_database_taxperiod',
-        'budsi_database_fiscalconfig', 
-        'budsi_database_project',
-        'budsi_database_contact', 
-        'budsi_database_fiscalprofile'
+        'emerg_database_invoiceconcept',  # Primero las líneas de factura
+        'emerg_database_invoice',         # Luego las facturas
+        'emerg_database_taxperiod',
+        'emerg_database_fiscalconfig', 
+        'emerg_database_project',
+        'emerg_database_contact', 
+        'emerg_database_fiscalprofile'
     ]
     
     deleted_total = 0
@@ -107,7 +107,7 @@ def main():
         models_to_check = ['Invoice', 'Contact', 'FiscalProfile', 'Project', 'InvoiceConcept']
         for model_name in models_to_check:
             try:
-                model = apps.get_model('budsi_database', model_name)
+                model = apps.get_model('emerg_database', model_name)
                 count = model.objects.count()
                 print(f"   • {model_name}: {count} registros restantes")
             except:

@@ -3,7 +3,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from budsi_database.models import FiscalProfile, User
+from emerg_database.models import FiscalProfile, User
 
 @login_required
 def account_settings_logic(request):
@@ -150,7 +150,7 @@ def account_settings_logic(request):
         return redirect('account_settings')
 
     # 🔽 GET: MOSTRAR PÁGINA CON DATOS ACTUALES
-    return render(request, "budsidesk_app/account_settings.html", {
+    return render(request, "emergency_app/account_settings.html", {
         "user": user,
         "profile": profile,
     })

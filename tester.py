@@ -25,7 +25,7 @@ from django.test.utils import CaptureQueriesContext
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 # Configurar Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'budsi_django.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emerg_django.settings')
 
 try:
     django.setup()
@@ -63,7 +63,7 @@ class AdvancedDjangoTester:
     
     def run_comprehensive_checks(self):
         """Ejecuta todas las verificaciones avanzadas"""
-        print("🧪 DIAGNÓSTICO AVANZADO BUDSI - DETECCIÓN PROFUNDA DE ERRORES")
+        print("🧪 DIAGNÓSTICO AVANZADO emerg - DETECCIÓN PROFUNDA DE ERRORES")
         print("=" * 70)
         
         # Obtener información de la base de datos primero
@@ -234,7 +234,7 @@ class AdvancedDjangoTester:
                 with transaction.atomic():
                     # Eliminar en orden para respetar constraints
                     try:
-                        from budsi_database.models import Invoice, Contact
+                        from emerg_database.models import Invoice, Contact
                         Invoice.objects.filter(user=self.test_user).delete()
                         Contact.objects.filter(user=self.test_user).delete()
                         
@@ -280,7 +280,7 @@ class AdvancedDjangoTester:
         print("\n📋 Analizando urls.py...")
         
         urls_files = [
-            'budsi_django/urls.py',
+            'emerg_django/urls.py',
         ]
         
         for urls_file in urls_files:
@@ -343,7 +343,7 @@ class AdvancedDjangoTester:
         print("\n👁️  Analizando views.py...")
         
         views_files = [
-            'budsi_django/views.py',
+            'emerg_django/views.py',
         ]
         
         for views_file in views_files:
@@ -414,7 +414,7 @@ class AdvancedDjangoTester:
         """Análisis profundo de settings.py"""
         print("\n⚙️  Analizando settings.py...")
         
-        settings_file = 'budsi_django/settings.py'
+        settings_file = 'emerg_django/settings.py'
         
         if not Path(settings_file).exists():
             self.errors.append(f"Archivo {settings_file} no encontrado")
@@ -487,7 +487,7 @@ class AdvancedDjangoTester:
         print("\n📝 Analizando forms.py...")
         
         forms_files = [
-            'budsi_django/forms.py',
+            'emerg_django/forms.py',
         ]
         
         for forms_file in forms_files:
@@ -539,7 +539,7 @@ class AdvancedDjangoTester:
         print("\n🗄️  Analizando models.py...")
         
         models_files = [
-            'budsi_database/models.py',
+            'emerg_database/models.py',
         ]
         
         for models_file in models_files:
@@ -600,7 +600,7 @@ class AdvancedDjangoTester:
         print("\n👨‍💼 Analizando admin.py...")
         
         admin_files = [
-            'budsi_database/admin.py',
+            'emerg_database/admin.py',
         ]
         
         for admin_file in admin_files:
@@ -654,8 +654,8 @@ class AdvancedDjangoTester:
             critical_tables = [
                 'django_migrations',
                 'auth_user',
-                'budsi_database_contact',
-                'budsi_database_invoice',
+                'emerg_database_contact',
+                'emerg_database_invoice',
             ]
             
             # Ajustar nombres de tablas según lo que realmente existe
@@ -846,7 +846,7 @@ class AdvancedDjangoTester:
     def _diagnose_contact_uniqueness_issue(self):
         """Diagnostica específicamente el problema de unicidad en Contact"""
         try:
-            from budsi_database.models import Contact
+            from emerg_database.models import Contact
             
             # Buscar contacts problemáticos del usuario de prueba
             user_contacts = Contact.objects.filter(user=self.test_user)
@@ -879,7 +879,7 @@ class AdvancedDjangoTester:
         print("👥 Probando unicidad de contactos...")
         
         try:
-            from budsi_database.models import Contact
+            from emerg_database.models import Contact
             
             # Usar email en lugar de username para el usuario
             test_user_identifier = self.test_user.email if hasattr(self.test_user, 'email') else 'test_user'
@@ -983,7 +983,7 @@ class AdvancedDjangoTester:
         print("🔄 Probando flujo completo de invoice...")
         
         try:
-            from budsi_database.models import Invoice, Contact
+            from emerg_database.models import Invoice, Contact
             
             # Usar email como identificador
             user_identifier = self.test_user.email if hasattr(self.test_user, 'email') else 'test_user'
@@ -1037,7 +1037,7 @@ class AdvancedDjangoTester:
         try:
             # Simular la función _create_or_get_contact
             from django.utils.text import slugify
-            from budsi_database.models import User
+            from emerg_database.models import User
             test_user = User.objects.filter().first()
             
             if test_user:
@@ -1055,7 +1055,7 @@ class AdvancedDjangoTester:
         print("🏷️ Probando validación de tax_id...")
         
         try:
-            from budsi_database.models import Contact
+            from emerg_database.models import Contact
             
             test_cases = [
                 {"tax_id": "", "should_work": False, "description": "Vacío"},
@@ -1117,7 +1117,7 @@ class AdvancedDjangoTester:
         print("🔢 Validando datos numéricos...")
         
         try:
-            from budsi_database.models import Invoice
+            from emerg_database.models import Invoice
             
             # Test: Valores negativos
             negative_invoice = Invoice(
@@ -1142,7 +1142,7 @@ class AdvancedDjangoTester:
         print("📅 Validando fechas...")
         
         try:
-            from budsi_database.models import Invoice
+            from emerg_database.models import Invoice
             from django.core.exceptions import ValidationError
             
             # Test: Fecha inválida
@@ -1569,10 +1569,10 @@ class AdvancedDjangoTester:
         print("📦 Verificando importaciones...")
         
         modules_to_check = [
-            'budsi_django.settings',
-            'budsi_django.urls',
-            'budsi_django.views',
-            'budsi_database.models',
+            'emerg_django.settings',
+            'emerg_django.urls',
+            'emerg_django.views',
+            'emerg_database.models',
         ]
         
         for module_path in modules_to_check:
@@ -1707,7 +1707,7 @@ class AdvancedDjangoTester:
             print(f"\n🔧 Se encontraron {len(self.errors)} problemas que necesitan atención inmediata")
             if any('tax_id' in error for error in self.errors):
                 print("\n💡 SOLUCIÓN RÁPIDA PARA ERROR tax_id:")
-                print("   1. Revisa el modelo Contact en budsi_database/models.py")
+                print("   1. Revisa el modelo Contact en emerg_database/models.py")
                 print("   2. Asegúrate de que tax_id tenga unique=True solo cuando no sea nulo")
                 print("   3. O usa un valor por defecto único para tax_id vacío")
                 print("   4. Ejecuta: python manage.py makemigrations && python manage.py migrate")
@@ -1716,14 +1716,14 @@ def main():
     """Función principal con argumentos CLI básicos"""
     import argparse
     
-    parser = argparse.ArgumentParser(description='Tester avanzado para proyecto Budsi')
+    parser = argparse.ArgumentParser(description='Tester avanzado para proyecto emerg')
     parser.add_argument('--only', nargs='+', help='Ejecutar solo checks específicos')
     parser.add_argument('--skip', nargs='+', help='Saltar checks específicos')
     parser.add_argument('--json', action='store_true', help='Generar reporte en JSON')
     
     args = parser.parse_args()
     
-    print("Iniciando tester avanzado de proyecto Budsi...")
+    print("Iniciando tester avanzado de proyecto emerg...")
     
     try:
         tester = AdvancedDjangoTester()

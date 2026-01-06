@@ -3,7 +3,7 @@
 Servicio para unificar el manejo de logos SIN cambiar estructura existente.
 Funciones parche para corregir flujos inconsistentes del logo.
 """
-from budsi_database.models import FiscalProfile
+from emerg_database.models import FiscalProfile
 
 def get_user_fiscal_profile(user):
     """

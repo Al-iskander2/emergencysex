@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction, connection
 
 # Configurar entorno Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "budsi_django.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "emerg_django.settings")
 django.setup()
 
 User = get_user_model()
@@ -32,7 +32,7 @@ def verify_and_confirm():
     models_to_clean = ['Invoice', 'Contact', 'FiscalProfile', 'Project']
     for model_name in models_to_clean:
         try:
-            model = apps.get_model('budsi_database', model_name)
+            model = apps.get_model('emerg_database', model_name)
             count = model.objects.count()
             print(f"   • {model_name}: {count} registros")
         except:
@@ -66,7 +66,7 @@ def purge_all_except_superusers(superusers):
     deleted_total = 0
     for model_name in deletion_order:
         try:
-            model = apps.get_model('budsi_database', model_name)
+            model = apps.get_model('emerg_database', model_name)
             count = model.objects.count()
             if count > 0:
                 print(f"🗑️  Eliminando {count} registros de {model_name}...")

@@ -11,7 +11,7 @@ python manage.py collectstatic --noinput
 : "${PORT:=10000}"
 : "${WEB_CONCURRENCY:=2}"
 
-exec gunicorn budsi_django.wsgi:application \
+exec gunicorn emerg_django.wsgi:application \
   --bind 0.0.0.0:${PORT} \
   --workers ${WEB_CONCURRENCY} \
   --timeout 120
